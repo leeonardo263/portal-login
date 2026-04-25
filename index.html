@@ -4920,7 +4920,8 @@ function v(id){var el=document.getElementById(id);return el?el.value:0;}
 <script>
 const SUPABASE_URL = "https://dgcswgwtylygpyqkpiol.supabase.co";
 const SUPABASE_KEY = "sb_publishable_tNIleylQBeGasd8C6jYMmA_a8Rb0HbA";
-const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window._supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const _supabase = window._supabase;
 
 function showPortal() {
   document.getElementById("loginScreen").style.display = "none";
@@ -4981,23 +4982,24 @@ async function trackEvent(tipo, sistema, detalhe) {
 var SYSTEM_NAMES = {"amadeus": "Amadeus", "galileo": "Galileo", "sabre": "Sabre", "calc": "Calculadora", "reacomo": "Reacomodação", "pref": "Preferência de Cia"};
 var TAB_NAMES = {"amadeus": ["Emissão", "Emissão Manual", "Reemissão Automática", "Reemissão Manual", "Reemissão Involuntária", "Criação & EMD", "PNR Completo", "Comandos"], "galileo": ["Emissão Manual", "Reemissão Manual", "Reemissão Involuntária", "Criação & EMD"], "sabre": ["Reservas (PNR)", "Disponibilidade", "Assentos", "Tarifas & Cálculo", "Bargain Finder", "Emissão", "Reemissão", "EMD & Extras", "Comandos"], "calc": ["Amadeus", "Sabre"], "reacomo": ["Fluxos Gerais", "Internacionais", "Nacionais", "Sistemas GDS"], "pref": []};
 
-// Sobrescreve showSystem para rastrear abertura de ferramenta
-var _origShowSystem = window.showSystem;
-window.showSystem = function(s) {
-  _origShowSystem(s);
-  var nome = SYSTEM_NAMES[s] || s;
-  trackEvent('abertura_ferramenta', nome, '');
-};
+// Sobrescreve funções após carregamento completo
+window.addEventListener('load', function() {
+  var _origShowSystem = window.showSystem;
+  window.showSystem = function(s) {
+    _origShowSystem(s);
+    var nome = SYSTEM_NAMES[s] || s;
+    trackEvent('abertura_ferramenta', nome, '');
+  };
 
-// Sobrescreve switchTab para rastrear navegação de abas
-var _origSwitchTab = window.switchTab;
-window.switchTab = function(sys, idx, btn) {
-  _origSwitchTab(sys, idx, btn);
-  var sistema = SYSTEM_NAMES[sys] || sys;
-  var tabs = TAB_NAMES[sys] || [];
-  var aba = tabs[idx] || ('Aba ' + (idx + 1));
-  trackEvent('navegacao_aba', sistema, aba);
-};
+  var _origSwitchTab = window.switchTab;
+  window.switchTab = function(sys, idx, btn) {
+    _origSwitchTab(sys, idx, btn);
+    var sistema = SYSTEM_NAMES[sys] || sys;
+    var tabs = TAB_NAMES[sys] || [];
+    var aba = tabs[idx] || ('Aba ' + (idx + 1));
+    trackEvent('navegacao_aba', sistema, aba);
+  };
+});
 </script>
 
 </body>
