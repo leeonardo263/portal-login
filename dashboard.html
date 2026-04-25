@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BeFly — Dashboard de Uso</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --orange: #F5821F;
+  --orange-dark: #D96D10;
+  --bg: #0D1123;
+  --surface: #141929;
+  --surface2: #1C2138;
+  --border: rgba(255,255,255,0.08);
+  --text: #F0EEE8;
+  --muted: #7A8099;
+  --green: #3DD68C;
+  --blue: #4A9EFF;
+  --purple: #9B7FFF;
+  --gold: #E8C547;
+  --pink: #FF6B9D;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+/* ── LOGIN ── */
+#loginScreen {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  width: 340px;
+  text-align: center;
+}
+.login-badge {
+  width: 48px; height: 48px;
+  background: var(--orange);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+  color: #fff; margin: 0 auto 14px;
+}
+.login-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 4px; }
+.login-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+.login-input {
+  width: 100%; margin-bottom: 12px; padding: 11px 14px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text);
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  box-sizing: border-box; outline: none;
+}
+.login-input:focus { border-color: rgba(245,130,31,.5); }
+.login-btn {
+  width: 100%; padding: 11px; background: var(--orange);
+  border: none; border-radius: 8px; color: #fff;
+  font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: background .2s;
+}
+.login-btn:hover { background: var(--orange-dark); }
+.login-error { color: #FF6B6B; font-size: 13px; margin-top: 10px; min-height: 20px; }
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,17,35,0.97);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-badge {
+  width: 36px; height: 36px; background: var(--orange);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; color: #fff;
+}
+.logo-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+.logo-text span { color: var(--orange); }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.tag {
+  font-size: 11px; font-weight: 500; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px;
+}
+.logout-btn {
+  background: rgba(255,255,255,.06); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--muted); cursor: pointer; transition: all .2s;
+}
+.logout-btn:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+.refresh-btn {
+  background: rgba(245,130,31,.12); border: 1px solid rgba(245,130,31,.28);
+  border-radius: 8px; padding: 6px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--orange); cursor: pointer; transition: all .2s;
+}
+.refresh-btn:hover { background: rgba(245,130,31,.22); }
+
+/* ── MAIN ── */
+main { padding: 2rem; max-width: 1300px; margin: 0 auto; }
+
+.page-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: -1px; margin-bottom: 6px;
+}
+.page-title em { font-style: normal; color: var(--orange); }
+.page-sub { font-size: 14px; color: var(--muted); margin-bottom: 2rem; }
+
+/* ── KPI CARDS ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.kpi-card:hover { border-color: rgba(255,255,255,.15); }
+.kpi-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+}
+.kpi-card.orange::before { background: linear-gradient(90deg, var(--orange), #FF9A45); }
+.kpi-card.green::before  { background: linear-gradient(90deg, var(--green), #00C9A7); }
+.kpi-card.blue::before   { background: linear-gradient(90deg, var(--blue), #7BBBFF); }
+.kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), #C8B4FF); }
+.kpi-label { font-size: 11px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.kpi-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.4rem; letter-spacing: -2px; line-height: 1; }
+.kpi-card.orange .kpi-value { color: var(--orange); }
+.kpi-card.green  .kpi-value { color: var(--green); }
+.kpi-card.blue   .kpi-value { color: var(--blue); }
+.kpi-card.purple .kpi-value { color: var(--purple); }
+.kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* ── CHARTS GRID ── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.chart-card.full { grid-column: 1 / -1; }
+.chart-title {
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 13px; letter-spacing: .3px; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+.chart-wrap { position: relative; height: 260px; }
+.chart-wrap.tall { height: 320px; }
+
+/* ── TABLE ── */
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.table-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.table-header-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .3px; text-transform: uppercase; }
+.table-header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.badge {
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 20px; background: rgba(245,130,31,.15);
+  color: var(--orange); border: 1px solid rgba(245,130,31,.25);
+}
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; padding: 12px 24px;
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+td {
+  padding: 13px 24px;
+  font-size: 13px; color: var(--text);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.sys-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 6px; letter-spacing: .5px;
+}
+.sys-amadeus  { background: rgba(0,108,235,.15); color: #4A9EFF; }
+.sys-galileo  { background: rgba(61,214,140,.15); color: #3DD68C; }
+.sys-sabre    { background: rgba(245,130,31,.15); color: var(--orange); }
+.sys-calc     { background: rgba(155,127,255,.15); color: var(--purple); }
+.sys-reacomo  { background: rgba(255,107,157,.15); color: var(--pink); }
+.sys-pref     { background: rgba(232,197,71,.15); color: var(--gold); }
+.sys-default  { background: rgba(122,128,153,.15); color: var(--muted); }
+
+/* ── LOADING ── */
+#loadingState {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 400px; gap: 16px;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--muted); }
+
+/* ── EMPTY ── */
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--muted);
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-text { font-size: 14px; }
+
+/* ── RESPONSIVE ── */
+@media(max-width: 900px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .charts-grid { grid-template-columns: 1fr; }
+  .chart-card.full { grid-column: 1; }
+}
+@media(max-width: 500px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  main { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-badge">BF</div>
+    <div class="login-title">Dashboard BeFly</div>
+    <div class="login-sub">Acesso restrito a gestores</div>
+    <input id="loginEmail" class="login-input" type="email" placeholder="E-mail">
+    <input id="loginPass"  class="login-input" type="password" placeholder="Senha">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="loginErro"></div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app" style="display:none;">
+
+  <header>
+    <div class="logo">
+      <div class="logo-badge">BF</div>
+      <div class="logo-text">Be<span>Fly</span></div>
+    </div>
+    <div class="header-right">
+      <span class="tag">Dashboard</span>
+      <button class="refresh-btn" onclick="loadData()">↻ Atualizar</button>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-title">Painel de <em>Uso</em></div>
+    <div class="page-sub" id="lastUpdate">Carregando dados...</div>
+
+    <!-- LOADING -->
+    <div id="loadingState">
+      <div class="spinner"></div>
+      <div class="loading-text">Buscando dados do Supabase...</div>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div id="content" style="display:none;">
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card orange">
+          <div class="kpi-label">Total de Acessos</div>
+          <div class="kpi-value" id="kpiTotal">—</div>
+          <div class="kpi-sub">eventos registrados</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Aberturas de Ferramenta</div>
+          <div class="kpi-value" id="kpiAberturas">—</div>
+          <div class="kpi-sub">cliques nos módulos</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">Navegações de Aba</div>
+          <div class="kpi-value" id="kpiAbas">—</div>
+          <div class="kpi-sub">trocas de aba</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">Usuários Ativos</div>
+          <div class="kpi-value" id="kpiUsuarios">—</div>
+          <div class="kpi-sub">e-mails distintos</div>
+        </div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="charts-grid">
+
+        <div class="chart-card">
+          <div class="chart-title">Ferramentas mais acessadas</div>
+          <div class="chart-sub">Por número de aberturas</div>
+          <div class="chart-wrap">
+            <canvas id="chartFerramentas"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Abas mais consultadas</div>
+          <div class="chart-sub">Top 8 abas por acesso</div>
+          <div class="chart-wrap">
+            <canvas id="chartAbas"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card full">
+          <div class="chart-title">Acessos ao longo do tempo</div>
+          <div class="chart-sub">Últimos 14 dias</div>
+          <div class="chart-wrap tall">
+            <canvas id="chartTempo"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TABELA ÚLTIMOS EVENTOS -->
+      <div class="table-card">
+        <div class="table-header">
+          <div>
+            <div class="table-header-title">Últimos eventos</div>
+            <div class="table-header-sub">Os 50 registros mais recentes</div>
+          </div>
+          <span class="badge" id="badgeTotal">0 eventos</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Ferramenta</th>
+                <th>Aba / Detalhe</th>
+                <th>Usuário</th>
+                <th>Data e Hora</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaEventos">
+              <tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Nenhum evento ainda</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /app -->
+
+<script>
+const SUPABASE_URL = "https://dgcswgwtylygpyqkpiol.supabase.co";
+const SUPABASE_KEY = "sb_publishable_tNIleylQBeGasd8C6jYMmA_a8Rb0HbA";
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── AUTH ──
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value.trim();
+  document.getElementById('loginErro').innerText = '';
+  const { error } = await _sb.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    document.getElementById('loginErro').innerText = 'E-mail ou senha incorretos.';
+  } else {
+    showApp();
+  }
+};
+
+window.doLogout = async function() {
+  await _sb.auth.signOut();
+  location.reload();
+};
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadData();
+}
+
+window.addEventListener('load', async () => {
+  const { data } = await _sb.auth.getSession();
+  if (data.session) showApp();
+});
+
+// ── CORES POR SISTEMA ──
+const COR_SISTEMA = {
+  'Amadeus':       '#4A9EFF',
+  'Galileo':       '#3DD68C',
+  'Sabre':         '#F5821F',
+  'Calculadora':   '#9B7FFF',
+  'Reacomodação':  '#FF6B9D',
+  'Preferência de Cia': '#E8C547',
+};
+function corSistema(s) { return COR_SISTEMA[s] || '#7A8099'; }
+function classSistema(s) {
+  const m = { 'Amadeus':'amadeus','Galileo':'galileo','Sabre':'sabre','Calculadora':'calc','Reacomodação':'reacomo','Preferência de Cia':'pref' };
+  return 'sys-badge sys-' + (m[s] || 'default');
+}
+
+// ── CHARTS ──
+var chartInstances = {};
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+function buildBarChart(id, labels, data, colors) {
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext('2d');
+  chartInstances[id] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#1C2138',
+        titleColor: '#F0EEE8',
+        bodyColor: '#7A8099',
+        borderColor: 'rgba(255,255,255,0.08)',
+        borderWidth: 1,
+        padding: 10,
+      }},
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7A8099', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7A8099', font: { size: 11 }, stepSize: 1 }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function buildLineChart(id, labels, data) {
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext('2d');
+  chartInstances[id] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#F5821F',
+        backgroundColor: 'rgba(245,130,31,0.08)',
+        borderWidth: 2,
+        pointBackgroundColor: '#F5821F',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#1C2138',
+        titleColor: '#F0EEE8',
+        bodyColor: '#7A8099',
+        borderColor: 'rgba(255,255,255,0.08)',
+        borderWidth: 1,
+        padding: 10,
+      }},
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7A8099', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7A8099', font: { size: 11 }, stepSize: 1 }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+// ── LOAD DATA ──
+window.loadData = async function() {
+  document.getElementById('loadingState').style.display = 'flex';
+  document.getElementById('content').style.display = 'none';
+
+  const { data: eventos, error } = await _sb
+    .from('portal_eventos')
+    .select('*')
+    .order('criado_em', { ascending: false });
+
+  if (error || !eventos) {
+    document.getElementById('loadingState').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Erro ao carregar dados.<br>Verifique as permissões no Supabase.</div></div>';
+    return;
+  }
+
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+
+  // ── KPIs ──
+  const aberturas = eventos.filter(e => e.tipo === 'abertura_ferramenta');
+  const abas      = eventos.filter(e => e.tipo === 'navegacao_aba');
+  const usuarios  = new Set(eventos.map(e => e.user_email)).size;
+
+  document.getElementById('kpiTotal').innerText    = eventos.length;
+  document.getElementById('kpiAberturas').innerText = aberturas.length;
+  document.getElementById('kpiAbas').innerText      = abas.length;
+  document.getElementById('kpiUsuarios').innerText  = usuarios;
+  document.getElementById('badgeTotal').innerText   = eventos.length + ' eventos';
+
+  const now = new Date();
+  document.getElementById('lastUpdate').innerText =
+    'Última atualização: ' + now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+
+  // ── GRÁFICO: Ferramentas ──
+  const contFerr = {};
+  aberturas.forEach(e => { contFerr[e.sistema] = (contFerr[e.sistema] || 0) + 1; });
+  const ferrOrdenado = Object.entries(contFerr).sort((a,b) => b[1]-a[1]);
+  buildBarChart('chartFerramentas',
+    ferrOrdenado.map(x => x[0]),
+    ferrOrdenado.map(x => x[1]),
+    ferrOrdenado.map(x => corSistema(x[0]))
+  );
+
+  // ── GRÁFICO: Abas ──
+  const contAbas = {};
+  abas.forEach(e => {
+    const key = e.sistema + ' › ' + e.detalhe;
+    contAbas[key] = (contAbas[key] || 0) + 1;
+  });
+  const abasOrdenado = Object.entries(contAbas).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  buildBarChart('chartAbas',
+    abasOrdenado.map(x => x[0].length > 22 ? x[0].substring(0,22)+'…' : x[0]),
+    abasOrdenado.map(x => x[1]),
+    abasOrdenado.map(x => corSistema(x[0].split(' › ')[0]))
+  );
+
+  // ── GRÁFICO: Linha de tempo (últimos 14 dias) ──
+  const hoje = new Date();
+  const dias = [];
+  const contDias = {};
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(hoje);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().substring(0,10);
+    dias.push(key);
+    contDias[key] = 0;
+  }
+  eventos.forEach(e => {
+    const key = e.criado_em.substring(0,10);
+    if (contDias[key] !== undefined) contDias[key]++;
+  });
+  buildLineChart('chartTempo',
+    dias.map(d => {
+      const parts = d.split('-');
+      return parts[2] + '/' + parts[1];
+    }),
+    dias.map(d => contDias[d])
+  );
+
+  // ── TABELA ──
+  const ultimos = eventos.slice(0, 50);
+  const tbody = document.getElementById('tabelaEventos');
+  if (ultimos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Nenhum evento registrado ainda.<br>Use o portal para gerar dados.</div></div></td></tr>';
+  } else {
+    tbody.innerHTML = ultimos.map(e => {
+      const dt = new Date(e.criado_em);
+      const hora = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+      return `<tr>
+        <td><span class="${classSistema(e.sistema)}">${e.sistema || '—'}</span></td>
+        <td style="color:var(--muted)">${e.detalhe || '—'}</td>
+        <td style="font-family:monospace;font-size:12px;color:var(--muted)">${e.user_email || '—'}</td>
+        <td style="color:var(--muted);font-size:12px">${hora}</td>
+      </tr>`;
+    }).join('');
+  }
+};
+</script>
+</body>
+</html>
