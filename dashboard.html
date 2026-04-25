@@ -122,6 +122,52 @@ main { padding: 2rem; max-width: 1300px; margin: 0 auto; }
 .page-title em { font-style: normal; color: var(--orange); }
 .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 2rem; }
 
+
+/* ── FILTRO ── */
+.filter-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 2rem; flex-wrap: wrap;
+}
+.filter-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted); white-space: nowrap;
+}
+.filter-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  transition: border-color .2s;
+  min-width: 220px;
+}
+.filter-select:focus { border-color: rgba(245,130,31,.5); }
+.filter-clear {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+.filter-clear:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+.filter-active-badge {
+  font-size: 11px; font-weight: 600; padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(245,130,31,.15);
+  color: var(--orange);
+  border: 1px solid rgba(245,130,31,.25);
+  display: none;
+}
+.filter-active-badge.visible { display: inline-block; }
+
 /* ── KPI CARDS ── */
 .kpi-grid {
   display: grid;
@@ -304,6 +350,17 @@ tr:hover td { background: rgba(255,255,255,.02); }
 
     <!-- CONTEÚDO -->
     <div id="content" style="display:none;">
+
+
+      <!-- FILTRO POR USUÁRIO -->
+      <div class="filter-bar">
+        <span class="filter-label">Filtrar por usuário:</span>
+        <select class="filter-select" id="filtroUsuario" onchange="aplicarFiltro()">
+          <option value="">— Todos os usuários —</option>
+        </select>
+        <button class="filter-clear" onclick="limparFiltro()">✕ Limpar</button>
+        <span class="filter-active-badge" id="filtroActiveBadge">Filtro ativo</span>
+      </div>
 
       <!-- KPIs -->
       <div class="kpi-grid">
@@ -513,6 +570,108 @@ function buildLineChart(id, labels, data) {
 }
 
 // ── LOAD DATA ──
+var _todosEventos = [];
+
+function aplicarFiltro() {
+  const usuario = document.getElementById('filtroUsuario').value;
+  const badge = document.getElementById('filtroActiveBadge');
+  if (usuario) {
+    badge.textContent = '👤 ' + usuario;
+    badge.classList.add('visible');
+  } else {
+    badge.classList.remove('visible');
+  }
+  renderDados(usuario ? _todosEventos.filter(e => e.user_email === usuario) : _todosEventos);
+}
+
+function limparFiltro() {
+  document.getElementById('filtroUsuario').value = '';
+  document.getElementById('filtroActiveBadge').classList.remove('visible');
+  renderDados(_todosEventos);
+}
+
+function popularSelectUsuarios(eventos) {
+  const select = document.getElementById('filtroUsuario');
+  const valorAtual = select.value;
+  const usuarios = [...new Set(eventos.map(e => e.user_email).filter(Boolean))].sort();
+  select.innerHTML = '<option value="">— Todos os usuários —</option>';
+  usuarios.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u;
+    opt.textContent = u;
+    if (u === valorAtual) opt.selected = true;
+    select.appendChild(opt);
+  });
+}
+
+function renderDados(eventos) {
+  const aberturas = eventos.filter(e => e.tipo === 'abertura_ferramenta');
+  const abas      = eventos.filter(e => e.tipo === 'navegacao_aba');
+  const usuarios  = new Set(eventos.map(e => e.user_email)).size;
+
+  document.getElementById('kpiTotal').innerText     = eventos.length;
+  document.getElementById('kpiAberturas').innerText = aberturas.length;
+  document.getElementById('kpiAbas').innerText      = abas.length;
+  document.getElementById('kpiUsuarios').innerText  = usuarios;
+  document.getElementById('badgeTotal').innerText   = eventos.length + ' eventos';
+
+  // Gráfico ferramentas
+  const contFerr = {};
+  aberturas.forEach(e => { contFerr[e.sistema] = (contFerr[e.sistema] || 0) + 1; });
+  const ferrOrdenado = Object.entries(contFerr).sort((a,b) => b[1]-a[1]);
+  buildBarChart('chartFerramentas',
+    ferrOrdenado.map(x => x[0]),
+    ferrOrdenado.map(x => x[1]),
+    ferrOrdenado.map(x => corSistema(x[0]))
+  );
+
+  // Gráfico abas
+  const contAbas = {};
+  abas.forEach(e => {
+    const key = e.sistema + ' › ' + e.detalhe;
+    contAbas[key] = (contAbas[key] || 0) + 1;
+  });
+  const abasOrdenado = Object.entries(contAbas).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  buildBarChart('chartAbas',
+    abasOrdenado.map(x => x[0].length > 22 ? x[0].substring(0,22)+'…' : x[0]),
+    abasOrdenado.map(x => x[1]),
+    abasOrdenado.map(x => corSistema(x[0].split(' › ')[0]))
+  );
+
+  // Gráfico linha de tempo
+  const hoje = new Date();
+  const dias = [];
+  const contDias = {};
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(hoje);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().substring(0,10);
+    dias.push(key);
+    contDias[key] = 0;
+  }
+  eventos.forEach(e => {
+    const key = e.criado_em.substring(0,10);
+    if (contDias[key] !== undefined) contDias[key]++;
+  });
+  buildLineChart('chartTempo',
+    dias.map(d => { const p = d.split('-'); return p[2]+'/'+p[1]; }),
+    dias.map(d => contDias[d])
+  );
+
+  // Tabela
+  const ultimos = eventos.slice(0, 50);
+  const tbody = document.getElementById('tabelaEventos');
+  if (ultimos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Nenhum evento para este filtro.</div></div></td></tr>';
+  } else {
+    tbody.innerHTML = ultimos.map(e => {
+      const dt = new Date(e.criado_em);
+      const hora = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+      return '<tr><td><span class="' + classSistema(e.sistema) + '">' + (e.sistema||'—') + '</span></td><td style="color:var(--muted)">' + (e.detalhe||'—') + '</td><td style="font-family:monospace;font-size:12px;color:var(--muted)">' + (e.user_email||'—') + '</td><td style="color:var(--muted);font-size:12px">' + hora + '</td></tr>';
+    }).join('');
+  }
+}
+
 window.loadData = async function() {
   document.getElementById('loadingState').style.display = 'flex';
   document.getElementById('content').style.display = 'none';
@@ -530,84 +689,15 @@ window.loadData = async function() {
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('content').style.display = 'block';
 
-  // ── KPIs ──
-  const aberturas = eventos.filter(e => e.tipo === 'abertura_ferramenta');
-  const abas      = eventos.filter(e => e.tipo === 'navegacao_aba');
-  const usuarios  = new Set(eventos.map(e => e.user_email)).size;
-
-  document.getElementById('kpiTotal').innerText    = eventos.length;
-  document.getElementById('kpiAberturas').innerText = aberturas.length;
-  document.getElementById('kpiAbas').innerText      = abas.length;
-  document.getElementById('kpiUsuarios').innerText  = usuarios;
-  document.getElementById('badgeTotal').innerText   = eventos.length + ' eventos';
+  _todosEventos = eventos;
+  popularSelectUsuarios(eventos);
 
   const now = new Date();
   document.getElementById('lastUpdate').innerText =
     'Última atualização: ' + now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
 
-  // ── GRÁFICO: Ferramentas ──
-  const contFerr = {};
-  aberturas.forEach(e => { contFerr[e.sistema] = (contFerr[e.sistema] || 0) + 1; });
-  const ferrOrdenado = Object.entries(contFerr).sort((a,b) => b[1]-a[1]);
-  buildBarChart('chartFerramentas',
-    ferrOrdenado.map(x => x[0]),
-    ferrOrdenado.map(x => x[1]),
-    ferrOrdenado.map(x => corSistema(x[0]))
-  );
-
-  // ── GRÁFICO: Abas ──
-  const contAbas = {};
-  abas.forEach(e => {
-    const key = e.sistema + ' › ' + e.detalhe;
-    contAbas[key] = (contAbas[key] || 0) + 1;
-  });
-  const abasOrdenado = Object.entries(contAbas).sort((a,b) => b[1]-a[1]).slice(0, 8);
-  buildBarChart('chartAbas',
-    abasOrdenado.map(x => x[0].length > 22 ? x[0].substring(0,22)+'…' : x[0]),
-    abasOrdenado.map(x => x[1]),
-    abasOrdenado.map(x => corSistema(x[0].split(' › ')[0]))
-  );
-
-  // ── GRÁFICO: Linha de tempo (últimos 14 dias) ──
-  const hoje = new Date();
-  const dias = [];
-  const contDias = {};
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(hoje);
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().substring(0,10);
-    dias.push(key);
-    contDias[key] = 0;
-  }
-  eventos.forEach(e => {
-    const key = e.criado_em.substring(0,10);
-    if (contDias[key] !== undefined) contDias[key]++;
-  });
-  buildLineChart('chartTempo',
-    dias.map(d => {
-      const parts = d.split('-');
-      return parts[2] + '/' + parts[1];
-    }),
-    dias.map(d => contDias[d])
-  );
-
-  // ── TABELA ──
-  const ultimos = eventos.slice(0, 50);
-  const tbody = document.getElementById('tabelaEventos');
-  if (ultimos.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Nenhum evento registrado ainda.<br>Use o portal para gerar dados.</div></div></td></tr>';
-  } else {
-    tbody.innerHTML = ultimos.map(e => {
-      const dt = new Date(e.criado_em);
-      const hora = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
-      return `<tr>
-        <td><span class="${classSistema(e.sistema)}">${e.sistema || '—'}</span></td>
-        <td style="color:var(--muted)">${e.detalhe || '—'}</td>
-        <td style="font-family:monospace;font-size:12px;color:var(--muted)">${e.user_email || '—'}</td>
-        <td style="color:var(--muted);font-size:12px">${hora}</td>
-      </tr>`;
-    }).join('');
-  }
+  // Aplica filtro já ativo (se houver) ou renderiza tudo
+  aplicarFiltro();
 };
 </script>
 </body>
