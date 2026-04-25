@@ -510,7 +510,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
       <div class="system-logo-wrap" style="background:rgba(255,107,157,.15);color:#FF6B9D;">⚠️</div>
       <div class="system-name">Erros GDS</div>
       <div class="system-desc">Banco de erros Amadeus e Sabre com soluções em português. Busca bilíngue por código ou mensagem.</div>
-      <div class="system-modules-count">249 Erros</div>
+      <div class="system-modules-count">334 Erros</div>
       <div class="system-arrow">→</div>
     </div>
   </div>
@@ -4932,7 +4932,7 @@ function v(id){var el=document.getElementById(id);return el?el.value:0;}
   <div style="margin-bottom:2rem;">
     <div style="font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#FF6B9D;margin-bottom:10px;display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:24px;height:2px;background:#FF6B9D;border-radius:2px;"></span>Base de Conhecimento</div>
     <h1 style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-1.5px;margin-bottom:8px;">Erros <em style="font-style:normal;color:#FF6B9D;">GDS</em></h1>
-    <p style="font-size:14px;color:#7A8099;">Banco com 249 erros do Amadeus e Sabre. Busque em português ou inglês — resposta sempre em português.</p>
+    <p style="font-size:14px;color:#7A8099;">Banco com 334 erros do Amadeus e Sabre. Busque em português ou inglês — resposta sempre em português.</p>
   </div>
 
   <!-- Busca -->
@@ -4973,7 +4973,7 @@ function v(id){var el=document.getElementById(id);return el?el.value:0;}
   <!-- Estado inicial -->
   <div id="erroInicial" style="text-align:center;padding:48px 20px;color:#7A8099;">
     <div style="font-size:36px;margin-bottom:16px;">⚠️</div>
-    <div style="font-size:15px;font-weight:500;color:#F0EEE8;margin-bottom:8px;">126 erros Amadeus · 123 erros Sabre</div>
+    <div style="font-size:15px;font-weight:500;color:#F0EEE8;margin-bottom:8px;">170 erros Amadeus · 164 erros Sabre</div>
     <div style="font-size:13px;">Digite acima para buscar pelo código ou descrição do erro.</div>
   </div>
 
@@ -5372,6 +5372,91 @@ var ERROS_GDS = [
   {sistema:"Sabre",codigo:"AVAILABILITY TIMEOUT",descricao_pt:"Timeout na disponibilidade",descricao_en:"Availability request timeout",solucao:"A consulta de disponibilidade excedeu o tempo. Tente novamente ou busque em horário de menor demanda."},
   {sistema:"Sabre",codigo:"HOST UNAVAILABLE",descricao_pt:"Host indisponível",descricao_en:"Airline host is unavailable",solucao:"O host da companhia aérea está indisponível. Tente novamente em alguns minutos."},
   {sistema:"Sabre",codigo:"CONCURRENT ACCESS",descricao_pt:"Acesso simultâneo",descricao_en:"Concurrent access detected",solucao:"O PNR está sendo acessado simultaneamente. Aguarde o outro usuário finalizar e tente novamente."},
+  {sistema:"Amadeus",codigo:"LATAM FARE RESTRICTED",descricao_pt:"Tarifa LATAM restrita",descricao_en:"LATAM fare restricted to specific agencies",solucao:"A tarifa LATAM está restrita a agências específicas. Verifique se seu pseudo-código tem acesso."},
+  {sistema:"Amadeus",codigo:"GOL SSR DENIED",descricao_pt:"SSR negado pela GOL",descricao_en:"GOL airline SSR request denied",solucao:"A GOL negou o serviço especial. Contate a GOL diretamente para solicitar o serviço."},
+  {sistema:"Amadeus",codigo:"AZUL NOT INTERLINE",descricao_pt:"Azul sem acordo interline",descricao_en:"Azul does not have interline agreement",solucao:"A Azul não possui acordo interline com esta companhia. Emita bilhetes separados."},
+  {sistema:"Amadeus",codigo:"AA RECORD LOCATOR",descricao_pt:"Localizador AA não encontrado",descricao_en:"American Airlines record locator not found",solucao:"O localizador da American Airlines não foi sincronizado. Aguarde alguns minutos e tente novamente."},
+  {sistema:"Amadeus",codigo:"AA SABRE ONLY",descricao_pt:"Reserva somente via Sabre",descricao_en:"American Airlines booking only via Sabre",solucao:"Algumas tarifas da American Airlines são exclusivas do Sabre. Tente no sistema correto."},
+  {sistema:"Amadeus",codigo:"LA CORPORATE ONLY",descricao_pt:"Tarifa corporativa exclusiva LATAM",descricao_en:"LATAM corporate fare only",solucao:"Esta tarifa LATAM é exclusiva para clientes corporativos. Verifique o contrato."},
+  {sistema:"Amadeus",codigo:"AD DISCOUNT INVALID",descricao_pt:"Desconto AD inválido",descricao_en:"AD discount code invalid",solucao:"O código de desconto AD está inválido ou expirado. Verifique com a companhia aérea."},
+  {sistema:"Amadeus",codigo:"ID DISCOUNT INVALID",descricao_pt:"Desconto ID inválido",descricao_en:"ID discount not valid",solucao:"O desconto de industria (ID) não é válido para esta rota ou companhia. Verifique as condições."},
+  {sistema:"Amadeus",codigo:"INFANT NO SEAT",descricao_pt:"Bebê sem assento",descricao_en:"Infant passenger has no seat assignment",solucao:"Bebês de colo não recebem assento. Remova a solicitação de assento para o bebê."},
+  {sistema:"Amadeus",codigo:"CHD AGE INVALID",descricao_pt:"Idade de criança inválida",descricao_en:"Child age is invalid or out of range",solucao:"A idade informada para criança está incorreta. Verifique: criança é de 2 a 11 anos no Amadeus."},
+  {sistema:"Amadeus",codigo:"PAX AGE MISMATCH",descricao_pt:"Idade do passageiro divergente",descricao_en:"Passenger age does not match fare type",solucao:"A idade do passageiro não corresponde ao tipo de tarifa (ADT/CHD/INF). Corrija o tipo."},
+  {sistema:"Amadeus",codigo:"SENIOR FARE INVALID",descricao_pt:"Tarifa sênior inválida",descricao_en:"Senior fare not valid",solucao:"A tarifa sênior não é válida para este passageiro ou rota. Verifique os requisitos de idade."},
+  {sistema:"Amadeus",codigo:"STUDENT FARE DENIED",descricao_pt:"Tarifa estudante negada",descricao_en:"Student fare denied",solucao:"A tarifa estudante foi negada. Apresente comprovante de matrícula ou escolha outra tarifa."},
+  {sistema:"Amadeus",codigo:"MILITARY FARE INVALID",descricao_pt:"Tarifa militar inválida",descricao_en:"Military fare invalid",solucao:"A tarifa militar não é válida. Verifique a documentação necessária e as condições da companhia."},
+  {sistema:"Amadeus",codigo:"UNACCOMPANIED MINOR",descricao_pt:"Menor desacompanhado",descricao_en:"Unaccompanied minor - special handling required",solucao:"Menor desacompanhado requer procedimento especial. Contate a companhia para autorização e taxas."},
+  {sistema:"Amadeus",codigo:"UM SERVICE DENIED",descricao_pt:"Serviço UM negado",descricao_en:"Unaccompanied minor service denied",solucao:"A companhia negou o serviço de menor desacompanhado para esta rota ou idade. Verifique as regras."},
+  {sistema:"Amadeus",codigo:"DEPORTEE NOT ALLOWED",descricao_pt:"Deportado não permitido",descricao_en:"Deportee not allowed on this flight",solucao:"Este voo não aceita passageiros deportados. Verifique com a companhia aérea."},
+  {sistema:"Amadeus",codigo:"INADMISSIBLE PAX",descricao_pt:"Passageiro inadmissível",descricao_en:"Inadmissible passenger",solucao:"Passageiro classificado como inadmissível. Contate a companhia aérea para procedimentos."},
+  {sistema:"Amadeus",codigo:"VIP SERVICE REQUIRED",descricao_pt:"Serviço VIP necessário",descricao_en:"VIP service handling required",solucao:"Este passageiro requer tratamento VIP. Insira os elementos necessários no PNR."},
+  {sistema:"Amadeus",codigo:"CIP ELEMENT MISSING",descricao_pt:"Elemento CIP ausente",descricao_en:"CIP element missing",solucao:"O elemento CIP (Commercially Important Passenger) está faltando. Insira antes de finalizar."},
+  {sistema:"Amadeus",codigo:"THROUGH CHECK IN",descricao_pt:"Check-in interline",descricao_en:"Through check-in not available",solucao:"O check-in interline não está disponível para este itinerário. Passageiro deve fazer check-in em cada trecho."},
+  {sistema:"Amadeus",codigo:"BAGGAGE INTERLINE",descricao_pt:"Bagagem interline",descricao_en:"Baggage interline not available",solucao:"O despacho de bagagem interline não está disponível. Passageiro deve retirar e despachar novamente."},
+  {sistema:"Amadeus",codigo:"EXCESS BAGGAGE RATE",descricao_pt:"Taxa de excesso de bagagem",descricao_en:"Excess baggage rate not found",solucao:"Não foi possível calcular a taxa de excesso. Consulte a tabela da companhia aérea."},
+  {sistema:"Amadeus",codigo:"SPORTS EQUIPMENT",descricao_pt:"Equipamento esportivo",descricao_en:"Sports equipment handling required",solucao:"Equipamento esportivo requer procedimento especial. Verifique taxas e procedimentos da companhia."},
+  {sistema:"Amadeus",codigo:"PET IN CABIN DENIED",descricao_pt:"Pet em cabine negado",descricao_en:"Pet in cabin not allowed",solucao:"A companhia não permite pet em cabine neste voo. Verifique a opção de porão ou outro voo."},
+  {sistema:"Amadeus",codigo:"OVERSIZED BAGGAGE",descricao_pt:"Bagagem fora do padrão",descricao_en:"Oversized baggage requires special handling",solucao:"Bagagem fora do padrão requer procedimento especial. Consulte as regras da companhia aérea."},
+  {sistema:"Amadeus",codigo:"CODESHARE NOT TICKETABLE",descricao_pt:"Codeshare não emitível",descricao_en:"Codeshare flight not ticketable via GDS",solucao:"Este voo codeshare não pode ser emitido via GDS. Contate a companhia operadora diretamente."},
+  {sistema:"Amadeus",codigo:"WET LEASE",descricao_pt:"Voo em wet lease",descricao_en:"Wet lease operation - verify procedures",solucao:"Este voo é operado em wet lease. Verifique os procedimentos específicos com a companhia aérea."},
+  {sistema:"Amadeus",codigo:"CHARTER FLIGHT",descricao_pt:"Voo charter",descricao_en:"Charter flight - special ticketing required",solucao:"Voo charter requer emissão especial. Verifique os procedimentos com o operador do charter."},
+  {sistema:"Amadeus",codigo:"TRAIN SEGMENT",descricao_pt:"Segmento de trem",descricao_en:"Train segment - different procedures apply",solucao:"Segmento de trem requer procedimentos diferentes. Consulte as regras específicas do operador."},
+  {sistema:"Amadeus",codigo:"SURFACE SEGMENT",descricao_pt:"Segmento de superfície",descricao_en:"Surface segment detected",solucao:"Segmento de superfície detectado. Insira ARNK ou confirme se é intencional."},
+  {sistema:"Amadeus",codigo:"CITY PAIR INVALID",descricao_pt:"Par de cidades inválido",descricao_en:"City pair not valid for this fare",solucao:"O par de cidades não é válido para esta tarifa. Verifique o roteamento permitido."},
+  {sistema:"Amadeus",codigo:"ORIGIN DESTINATION MISMATCH",descricao_pt:"Origem/destino divergente",descricao_en:"Origin destination mismatch",solucao:"A origem ou destino não corresponde à tarifa. Verifique o itinerário e a base tarifária."},
+  {sistema:"Amadeus",codigo:"HIDDEN CITY NOT ALLOWED",descricao_pt:"Hidden city não permitido",descricao_en:"Hidden city ticketing not allowed",solucao:"Hidden city ticketing não é permitido. Este itinerário pode ser cancelado pela companhia."},
+  {sistema:"Amadeus",codigo:"BACK TO BACK DENIED",descricao_pt:"Back to back negado",descricao_en:"Back to back ticketing detected",solucao:"Emissão back to back detectada. Esta prática viola as regras tarifárias e pode ser penalizada."},
+  {sistema:"Amadeus",codigo:"MARRIED SEGMENT",descricao_pt:"Segmento casado",descricao_en:"Married segment - cannot be separated",solucao:"Este segmento está casado com outro. Não pode ser vendido separadamente."},
+  {sistema:"Amadeus",codigo:"MARRIED SEGMENT BREAK",descricao_pt:"Quebra de segmento casado",descricao_en:"Married segment break not allowed",solucao:"Não é possível quebrar segmentos casados. Mantenha o itinerário completo."},
+  {sistema:"Amadeus",codigo:"WAITLIST CONFIRMED",descricao_pt:"Lista de espera confirmada",descricao_en:"Waitlist segment has been confirmed",solucao:"O segmento em lista de espera foi confirmado. Notifique o passageiro e verifique o PNR."},
+  {sistema:"Amadeus",codigo:"HX STATUS",descricao_pt:"Segmento cancelado pelo passageiro",descricao_en:"HX - cancelled by passenger",solucao:"Status HX indica cancelamento pelo passageiro. Verifique se há reemissão ou reembolso pendente."},
+  {sistema:"Amadeus",codigo:"UN STATUS",descricao_pt:"Não confirmado pela cia",descricao_en:"UN - unable to confirm",solucao:"A companhia não conseguiu confirmar. Tente outro voo ou horário."},
+  {sistema:"Amadeus",codigo:"UC STATUS",descricao_pt:"Não confirmado pelo GDS",descricao_en:"UC - unable to confirm by GDS",solucao:"GDS não conseguiu confirmar. Tente novamente ou contate o suporte Amadeus."},
+  {sistema:"Amadeus",codigo:"NO STATUS",descricao_pt:"Status desconhecido",descricao_en:"NO - no action taken",solucao:"Status NO indica que nenhuma ação foi tomada. Reenvie a solicitação à companhia."},
+  {sistema:"Amadeus",codigo:"KL STATUS",descricao_pt:"Lista de espera confirmada cia",descricao_en:"KL - confirmed from waitlist by carrier",solucao:"Status KL indica confirmação da lista de espera pela companhia. Verifique e notifique o passageiro."},
+  {sistema:"Amadeus",codigo:"PASSIVE SELL LIMIT",descricao_pt:"Limite de segmentos passivos",descricao_en:"Passive sell limit reached",solucao:"O limite de segmentos passivos foi atingido. Verifique a necessidade de cada segmento passivo."},
+  {sistema:"Sabre",codigo:"LATAM RESTRICTED",descricao_pt:"Tarifa LATAM restrita",descricao_en:"LATAM fare access restricted",solucao:"Acesso restrito à tarifa LATAM. Verifique se sua pseudocidade tem permissão para esta tarifa."},
+  {sistema:"Sabre",codigo:"GOL BOOKING ERROR",descricao_pt:"Erro de reserva GOL",descricao_en:"GOL booking error",solucao:"Erro ao reservar na GOL. Tente novamente ou acesse o portal direto da companhia."},
+  {sistema:"Sabre",codigo:"AZUL INTERLINE DENIED",descricao_pt:"Interline Azul negado",descricao_en:"Azul interline not available",solucao:"A Azul não possui acordo interline para este itinerário. Emita os trechos separadamente."},
+  {sistema:"Sabre",codigo:"AA HOST ERROR",descricao_pt:"Erro no host AA",descricao_en:"American Airlines host error",solucao:"Erro de comunicação com o host da American Airlines. Aguarde e tente novamente."},
+  {sistema:"Sabre",codigo:"AA NDC REQUIRED",descricao_pt:"NDC obrigatório para AA",descricao_en:"American Airlines requires NDC channel",solucao:"Esta tarifa da American Airlines requer canal NDC. Configure o acesso NDC ou contate o suporte."},
+  {sistema:"Sabre",codigo:"LA FARE NOT LOADED",descricao_pt:"Tarifa LATAM não carregada",descricao_en:"LATAM fare not loaded in Sabre",solucao:"A tarifa LATAM não está carregada no Sabre. Tente via portal LATAM ou contate o suporte."},
+  {sistema:"Sabre",codigo:"AD DISCOUNT DENIED",descricao_pt:"Desconto AD negado",descricao_en:"AD discount denied by carrier",solucao:"A companhia negou o desconto AD. Verifique a elegibilidade e os documentos necessários."},
+  {sistema:"Sabre",codigo:"ID FARE INVALID",descricao_pt:"Tarifa ID inválida",descricao_en:"ID industry discount fare invalid",solucao:"A tarifa de desconto para profissionais de aviação não é válida. Verifique as condições."},
+  {sistema:"Sabre",codigo:"CHD FARE REQUIRED",descricao_pt:"Tarifa infantil necessária",descricao_en:"Child fare required",solucao:"Passageiro menor de 12 anos requer tarifa infantil. Corrija o tipo de passageiro no PNR."},
+  {sistema:"Sabre",codigo:"INF FARE REQUIRED",descricao_pt:"Tarifa bebê necessária",descricao_en:"Infant fare required",solucao:"Passageiro menor de 2 anos requer tarifa de bebê. Corrija o tipo de passageiro."},
+  {sistema:"Sabre",codigo:"AGE VERIFICATION NEEDED",descricao_pt:"Verificação de idade necessária",descricao_en:"Age verification required",solucao:"A idade do passageiro precisa ser verificada para esta tarifa. Solicite documento comprobatório."},
+  {sistema:"Sabre",codigo:"UM REQUIRED",descricao_pt:"Serviço UM necessário",descricao_en:"Unaccompanied minor service required",solucao:"Passageiro menor viajando sozinho requer serviço UM. Contate a companhia para procedimentos."},
+  {sistema:"Sabre",codigo:"UM AGE RESTRICTION",descricao_pt:"Restrição de idade UM",descricao_en:"Unaccompanied minor age restriction",solucao:"A idade do menor não está dentro do permitido para o serviço UM desta companhia."},
+  {sistema:"Sabre",codigo:"STUDENT VERIFICATION",descricao_pt:"Verificação estudante necessária",descricao_en:"Student status verification required",solucao:"É necessário verificar o status de estudante para esta tarifa. Solicite comprovante de matrícula."},
+  {sistema:"Sabre",codigo:"SENIOR AGE REQUIRED",descricao_pt:"Idade sênior necessária",descricao_en:"Senior passenger age verification required",solucao:"Verifique se o passageiro atende ao requisito de idade mínima para tarifa sênior."},
+  {sistema:"Sabre",codigo:"SPORTS EQUIPMENT FEE",descricao_pt:"Taxa equipamento esportivo",descricao_en:"Sports equipment fee required",solucao:"Taxa adicional para equipamento esportivo. Informe o passageiro e processe o pagamento."},
+  {sistema:"Sabre",codigo:"PET FEE REQUIRED",descricao_pt:"Taxa de pet necessária",descricao_en:"Pet transportation fee required",solucao:"Taxa de transporte de animal requerida. Processe o pagamento antes do embarque."},
+  {sistema:"Sabre",codigo:"EXCESS BAGGAGE DENIED",descricao_pt:"Excesso de bagagem negado",descricao_en:"Excess baggage not allowed on this fare",solucao:"Esta tarifa não permite excesso de bagagem. Informe o passageiro das opções disponíveis."},
+  {sistema:"Sabre",codigo:"THROUGH BAGGAGE ERROR",descricao_pt:"Erro de bagagem em conexão",descricao_en:"Through baggage check error",solucao:"Erro no despacho de bagagem para conexão. Verifique o acordo de bagagem entre as companhias."},
+  {sistema:"Sabre",codigo:"CODESHARE HOST ERROR",descricao_pt:"Erro no host codeshare",descricao_en:"Codeshare host communication error",solucao:"Erro de comunicação com o host da companhia operadora do codeshare. Tente novamente."},
+  {sistema:"Sabre",codigo:"MARRIED SEG VIOLATION",descricao_pt:"Violação de segmento casado",descricao_en:"Married segment violation",solucao:"Tentativa de separar segmentos casados. Mantenha o itinerário completo ou escolha outro voo."},
+  {sistema:"Sabre",codigo:"MARRIED SEG REQUIRED",descricao_pt:"Segmento casado obrigatório",descricao_en:"Complete married segment required",solucao:"O segmento casado incompleto não pode ser emitido. Adicione todos os trechos relacionados."},
+  {sistema:"Sabre",codigo:"HX SEGMENT",descricao_pt:"Segmento cancelado HX",descricao_en:"HX segment - cancelled by passenger",solucao:"Segmento com status HX. Verifique pendências de reembolso ou reemissão."},
+  {sistema:"Sabre",codigo:"UN UNABLE",descricao_pt:"Companhia não confirmou",descricao_en:"UN - airline unable to confirm",solucao:"Companhia não confirmou a reserva. Ofereça alternativas ao passageiro."},
+  {sistema:"Sabre",codigo:"HS WAITLIST",descricao_pt:"Lista de espera HS",descricao_en:"HS - waitlisted by carrier",solucao:"Passageiro em lista de espera pela companhia. Monitore e notifique quando confirmado."},
+  {sistema:"Sabre",codigo:"BACK TO BACK ALERT",descricao_pt:"Alerta back to back",descricao_en:"Back to back ticket alert",solucao:"Possível emissão back to back detectada. Esta prática viola as regras tarifárias."},
+  {sistema:"Sabre",codigo:"HIDDEN CITY ALERT",descricao_pt:"Alerta hidden city",descricao_en:"Hidden city itinerary detected",solucao:"Itinerário de hidden city detectado. Este tipo de emissão viola as regras e pode ser cancelado."},
+  {sistema:"Sabre",codigo:"CHARTER NOT AVAILABLE",descricao_pt:"Charter indisponível",descricao_en:"Charter flight not available via GDS",solucao:"Este voo charter não está disponível para reserva via GDS. Contate o operador diretamente."},
+  {sistema:"Sabre",codigo:"WET LEASE OPERATION",descricao_pt:"Operação wet lease",descricao_en:"Wet lease operation - verify carrier",solucao:"Operação wet lease detectada. Verifique qual companhia opera o voo e seus procedimentos."},
+  {sistema:"Sabre",codigo:"SURFACE REQUIRED",descricao_pt:"Superfície necessária",descricao_en:"Surface transportation segment required",solucao:"É necessário indicar o trecho de superfície no itinerário. Adicione o segmento ARNK."},
+  {sistema:"Sabre",codigo:"CITY NOT SERVED",descricao_pt:"Cidade não atendida",descricao_en:"City not served by this carrier",solucao:"A companhia aérea não opera para esta cidade. Escolha outro destino ou companhia."},
+  {sistema:"Sabre",codigo:"ROUTING VIOLATION",descricao_pt:"Violação de roteamento",descricao_en:"Routing restriction violation",solucao:"O roteamento viola as restrições da tarifa. Escolha um itinerário dentro do permitido."},
+  {sistema:"Sabre",codigo:"STOPOVER FEE",descricao_pt:"Taxa de parada",descricao_en:"Stopover fee required",solucao:"Esta parada no itinerário está sujeita a taxa adicional. Informe o passageiro e processe o pagamento."},
+  {sistema:"Sabre",codigo:"CONNECTION TIME",descricao_pt:"Tempo de conexão insuficiente",descricao_en:"Insufficient connection time",solucao:"O tempo de conexão entre os voos é insuficiente. Escolha um voo com conexão mais longa."},
+  {sistema:"Sabre",codigo:"MCT VIOLATION",descricao_pt:"Violação de MCT",descricao_en:"Minimum connection time violation",solucao:"O tempo de conexão é menor que o mínimo exigido pelo aeroporto. Revise o itinerário."},
+  {sistema:"Sabre",codigo:"OVERNIGHT CONNECTION",descricao_pt:"Conexão noturna",descricao_en:"Overnight connection detected",solucao:"Conexão noturna detectada. Verifique se a tarifa permite e informe o passageiro sobre hospedagem."},
+  {sistema:"Sabre",codigo:"TRANSIT HOTEL",descricao_pt:"Hotel de trânsito",descricao_en:"Transit hotel may be required",solucao:"Passageiro pode precisar de hotel de trânsito. Verifique as regras do país de conexão."},
+  {sistema:"Sabre",codigo:"LATE ARRIVAL",descricao_pt:"Chegada tardia",descricao_en:"Late arrival - check procedures",solucao:"Chegada tardia pode impactar conexões ou serviços reservados. Verifique e notifique o passageiro."},
+  {sistema:"Sabre",codigo:"EARLY DEPARTURE",descricao_pt:"Partida antecipada",descricao_en:"Early departure - check in procedures",solucao:"Partida muito cedo pode exigir procedimentos especiais de check-in. Oriente o passageiro."},
+  {sistema:"Sabre",codigo:"AIRPORT CHANGE",descricao_pt:"Mudança de aeroporto",descricao_en:"Airport change in itinerary",solucao:"Há mudança de aeroporto no itinerário. Verifique se o passageiro tem tempo e meios para o translado."},
+  {sistema:"Sabre",codigo:"TERMINAL CHANGE",descricao_pt:"Mudança de terminal",descricao_en:"Terminal change required",solucao:"Há mudança de terminal no itinerário. Informe o passageiro sobre o translado necessário."},
 ];
 
 function buscarErro() {
