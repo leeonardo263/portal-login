@@ -4926,6 +4926,7 @@ const _supabase = window._supabase;
 function showPortal() {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("portalApp").style.display = "block";
+  if (typeof resetTimer === 'function') resetTimer();
   const headerRight = document.querySelector(".header-right");
   if (headerRight && !document.getElementById("logoutBtn")) {
     const btn = document.createElement("button");
@@ -5000,6 +5001,56 @@ window.addEventListener('load', function() {
     trackEvent('navegacao_aba', sistema, aba);
   };
 });
+</script>
+
+
+<!-- ══ TIMEOUT DE INATIVIDADE (30 min) ══ -->
+<script>
+(function() {
+  var TIMEOUT_MS = 30 * 60 * 1000; // 30 minutos
+  var timer;
+
+  function resetTimer() {
+    clearTimeout(timer);
+    timer = setTimeout(async function() {
+      await window._supabase.auth.signOut();
+      alert('Sua sessão expirou por inatividade. Faça login novamente.');
+      location.reload();
+    }, TIMEOUT_MS);
+  }
+
+  // Reseta o timer em qualquer interação do usuário
+  ['mousemove','mousedown','keydown','touchstart','scroll','click'].forEach(function(evt) {
+    document.addEventListener(evt, resetTimer, true);
+  });
+
+  // Inicia o timer quando o portal for exibido
+  var _origShowPortal = window.showPortal;
+  window.addEventListener('load', function() {
+    var origShowPortal = window.showPortal;
+    if (origShowPortal) {
+      window.showPortal = function() {
+        origShowPortal();
+        resetTimer();
+      };
+    }
+    // Se já está logado (sessão ativa), inicia o timer direto
+    if (document.getElementById('portalApp') && 
+        document.getElementById('portalApp').style.display !== 'none') {
+      resetTimer();
+    }
+  });
+
+  // Garante que o timer inicia mesmo se showPortal já foi chamado
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      if (document.getElementById('portalApp') &&
+          document.getElementById('portalApp').style.display !== 'none') {
+        resetTimer();
+      }
+    }, 1500);
+  });
+})();
 </script>
 
 </body>
