@@ -4959,5 +4959,46 @@ window.addEventListener("load", async () => {
 });
 </script>
 
+
+<!-- ══ TRACKING DE USO ══ -->
+<script>
+async function trackEvent(tipo, sistema, detalhe) {
+  if (!window._supabase) return;
+  try {
+    const { data: { session } } = await window._supabase.auth.getSession();
+    const user_email = session ? session.user.email : 'anonimo';
+    await window._supabase.from('portal_eventos').insert([{
+      tipo: tipo,
+      sistema: sistema,
+      detalhe: detalhe,
+      user_email: user_email,
+      criado_em: new Date().toISOString()
+    }]);
+  } catch(e) { /* silencioso */ }
+}
+
+// Nomes amigáveis por sistema
+var SYSTEM_NAMES = {"amadeus": "Amadeus", "galileo": "Galileo", "sabre": "Sabre", "calc": "Calculadora", "reacomo": "Reacomodação", "pref": "Preferência de Cia"};
+var TAB_NAMES = {"amadeus": ["Emissão", "Emissão Manual", "Reemissão Automática", "Reemissão Manual", "Reemissão Involuntária", "Criação & EMD", "PNR Completo", "Comandos"], "galileo": ["Emissão Manual", "Reemissão Manual", "Reemissão Involuntária", "Criação & EMD"], "sabre": ["Reservas (PNR)", "Disponibilidade", "Assentos", "Tarifas & Cálculo", "Bargain Finder", "Emissão", "Reemissão", "EMD & Extras", "Comandos"], "calc": ["Amadeus", "Sabre"], "reacomo": ["Fluxos Gerais", "Internacionais", "Nacionais", "Sistemas GDS"], "pref": []};
+
+// Sobrescreve showSystem para rastrear abertura de ferramenta
+var _origShowSystem = window.showSystem;
+window.showSystem = function(s) {
+  _origShowSystem(s);
+  var nome = SYSTEM_NAMES[s] || s;
+  trackEvent('abertura_ferramenta', nome, '');
+};
+
+// Sobrescreve switchTab para rastrear navegação de abas
+var _origSwitchTab = window.switchTab;
+window.switchTab = function(sys, idx, btn) {
+  _origSwitchTab(sys, idx, btn);
+  var sistema = SYSTEM_NAMES[sys] || sys;
+  var tabs = TAB_NAMES[sys] || [];
+  var aba = tabs[idx] || ('Aba ' + (idx + 1));
+  trackEvent('navegacao_aba', sistema, aba);
+};
+</script>
+
 </body>
 </html>
