@@ -506,6 +506,13 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
       <div class="system-modules-count">42 Companhias</div>
       <div class="system-arrow">→</div>
     </div>
+    <div class="system-card erros" onclick="showSystem('erros')" style="border-color:rgba(255,107,157,.2);">
+      <div class="system-logo-wrap" style="background:rgba(255,107,157,.15);color:#FF6B9D;">⚠️</div>
+      <div class="system-name">Erros GDS</div>
+      <div class="system-desc">Banco de erros Amadeus e Sabre com soluções em português. Busca bilíngue por código ou mensagem.</div>
+      <div class="system-modules-count">117 Erros</div>
+      <div class="system-arrow">→</div>
+    </div>
   </div>
 </div>
 
@@ -4913,6 +4920,65 @@ function v(id){var el=document.getElementById(id);return el?el.value:0;}
 </div>
 
 
+
+<!-- ══════════════════════════════════════
+     ERROS GDS VIEW
+══════════════════════════════════════ -->
+<div id="erros-view" class="system-view" style="min-height:calc(100vh - 64px);padding:2rem;max-width:900px;margin:0 auto;">
+
+  <!-- Back button -->
+  <button onclick="goHome()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 16px;color:#7A8099;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-bottom:2rem;transition:all .2s;" onmouseover="this.style.color='#F0EEE8'" onmouseout="this.style.color='#7A8099'">← Voltar</button>
+
+  <div style="margin-bottom:2rem;">
+    <div style="font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#FF6B9D;margin-bottom:10px;display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:24px;height:2px;background:#FF6B9D;border-radius:2px;"></span>Base de Conhecimento</div>
+    <h1 style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-1.5px;margin-bottom:8px;">Erros <em style="font-style:normal;color:#FF6B9D;">GDS</em></h1>
+    <p style="font-size:14px;color:#7A8099;">Banco com 117 erros do Amadeus e Sabre. Busque em português ou inglês — resposta sempre em português.</p>
+  </div>
+
+  <!-- Busca -->
+  <div style="background:#141929;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;margin-bottom:24px;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;position:relative;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#7A8099;font-size:16px;">🔍</span>
+        <input id="erroBusca" type="text"
+          placeholder="Digite o código ou mensagem de erro (PT ou EN)..."
+          oninput="buscarErro()"
+          style="width:100%;padding:12px 14px 12px 40px;background:#1C2138;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#F0EEE8;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
+          onfocus="this.style.borderColor='rgba(255,107,157,.5)'"
+          onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+        >
+      </div>
+      <select id="erroSistema" onchange="buscarErro()"
+        style="padding:12px 16px;background:#1C2138;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#F0EEE8;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;cursor:pointer;">
+        <option value="">Todos os sistemas</option>
+        <option value="Amadeus">Amadeus</option>
+        <option value="Sabre">Sabre</option>
+      </select>
+      <button onclick="limparBuscaErro()"
+        style="padding:12px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#7A8099;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .2s;"
+        onmouseover="this.style.color='#F0EEE8'" onmouseout="this.style.color='#7A8099'">✕ Limpar</button>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#7A8099;">💡 Dica: funciona com qualquer parte do erro — ex: <span style="color:#F0EEE8;font-family:monospace;">INVLD</span>, <span style="color:#F0EEE8;font-family:monospace;">invalid entry</span>, <span style="color:#F0EEE8;font-family:monospace;">tarifa</span>, <span style="color:#F0EEE8;font-family:monospace;">duplicate</span></div>
+  </div>
+
+  <!-- Resultados -->
+  <div id="erroResultados" style="display:none;">
+    <div id="erroVazio" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px;color:#7A8099;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">🔎</div>
+      <div style="font-size:14px;">Nenhum erro encontrado para esta busca.<br>Tente outras palavras-chave.</div>
+    </div>
+    <div id="erroLista"></div>
+  </div>
+
+  <!-- Estado inicial -->
+  <div id="erroInicial" style="text-align:center;padding:48px 20px;color:#7A8099;">
+    <div style="font-size:36px;margin-bottom:16px;">⚠️</div>
+    <div style="font-size:15px;font-weight:500;color:#F0EEE8;margin-bottom:8px;">62 erros Amadeus · 55 erros Sabre</div>
+    <div style="font-size:13px;">Digite acima para buscar pelo código ou descrição do erro.</div>
+  </div>
+
+</div>
+
 </div><!-- /portalApp -->
 
 <!-- ══ SUPABASE + AUTH ══ -->
@@ -5051,6 +5117,189 @@ window.addEventListener('load', function() {
     }, 1500);
   });
 })();
+</script>
+
+
+<!-- ══ ERROS GDS ══ -->
+<script>
+var ERROS_GDS = [
+  {sistema:"Amadeus",codigo:"INVLD",descricao_pt:"Comando inválido",descricao_en:"Invalid entry",solucao:"Verifique a sintaxe do comando. Consulte o manual do formato correto para a transação desejada."},
+  {sistema:"Amadeus",codigo:"NO DATA",descricao_pt:"Sem dados encontrados",descricao_en:"No data found",solucao:"Nenhum resultado para os critérios informados. Verifique datas"},
+  {sistema:"Amadeus",codigo:"CHECK DATE",descricao_pt:"Data inválida",descricao_en:"Check date",solucao:"A data informada é inválida ou está no passado. Corrija o formato para DDMMM (ex: 15JAN)."},
+  {sistema:"Amadeus",codigo:"RESTRICTED",descricao_pt:"Tarifa restrita",descricao_en:"Restricted fare",solucao:"Tarifa com restrições de emissão. Verifique as condições ou tente outra classe tarifária."},
+  {sistema:"Amadeus",codigo:"NEED IATA",descricao_pt:"IATA necessário",descricao_en:"Need IATA number",solucao:"Insira o número IATA da agência antes de prosseguir com a emissão."},
+  {sistema:"Amadeus",codigo:"SEGMENT SELL",descricao_pt:"Erro ao vender segmento",descricao_en:"Segment sell error",solucao:"Verifique disponibilidade do voo. Tente novamente ou escolha outro voo."},
+  {sistema:"Amadeus",codigo:"UNABLE",descricao_pt:"Transação não processada",descricao_en:"Unable to process",solucao:"O sistema não conseguiu processar. Tente novamente ou entre em contato com o suporte Amadeus."},
+  {sistema:"Amadeus",codigo:"NEED PHONE",descricao_pt:"Telefone obrigatório",descricao_en:"Phone element required",solucao:"Adicione o elemento de telefone ao PNR antes de finalizar. Use o comando AP."},
+  {sistema:"Amadeus",codigo:"NEED TKT",descricao_pt:"Prazo de emissão expirado",descricao_en:"Ticketing time limit required",solucao:"O prazo de emissão venceu. Renegue os segmentos e refaça a reserva."},
+  {sistema:"Amadeus",codigo:"NAME MISMATCH",descricao_pt:"Nome não confere",descricao_en:"Name mismatch",solucao:"O nome do passageiro não confere com o documento. Corrija antes de emitir."},
+  {sistema:"Amadeus",codigo:"DUPLICATE",descricao_pt:"Reserva duplicada",descricao_en:"Duplicate booking detected",solucao:"Já existe uma reserva para este passageiro neste voo. Verifique e cancele a duplicata."},
+  {sistema:"Amadeus",codigo:"NOT ALLOWED",descricao_pt:"Operação não permitida",descricao_en:"Not allowed",solucao:"Sua credencial não possui permissão para esta operação. Contate o administrador."},
+  {sistema:"Amadeus",codigo:"SEGMENT CLOSED",descricao_pt:"Segmento fechado",descricao_en:"Segment closed",solucao:"O voo não aceita mais reservas. Escolha outro voo ou classe disponível."},
+  {sistema:"Amadeus",codigo:"FLOWN",descricao_pt:"Voo já realizado",descricao_en:"Segment already flown",solucao:"Este segmento já foi operado e não pode ser alterado."},
+  {sistema:"Amadeus",codigo:"PAST DATE",descricao_pt:"Data no passado",descricao_en:"Past date",solucao:"A data informada já passou. Corrija para uma data futura."},
+  {sistema:"Amadeus",codigo:"FARE NOT FOUND",descricao_pt:"Tarifa não encontrada",descricao_en:"Fare not found",solucao:"Nenhuma tarifa disponível para os critérios. Tente datas ou classes diferentes."},
+  {sistema:"Amadeus",codigo:"NO AVAILABILITY",descricao_pt:"Sem disponibilidade",descricao_en:"No availability",solucao:"Não há assentos disponíveis nesta classe. Tente outra classe ou voo."},
+  {sistema:"Amadeus",codigo:"FORMAT",descricao_pt:"Erro de formato",descricao_en:"Format error",solucao:"O comando foi digitado no formato incorreto. Verifique espaços e separadores."},
+  {sistema:"Amadeus",codigo:"VERIFY NAMES",descricao_pt:"Verifique os nomes",descricao_en:"Please verify passenger names",solucao:"Confirme se os nomes estão corretos antes de prosseguir com a emissão."},
+  {sistema:"Amadeus",codigo:"TKT LIMIT",descricao_pt:"Limite de emissão",descricao_en:"Ticketing time limit",solucao:"O bilhete precisa ser emitido até a data/hora indicada para garantir a tarifa."},
+  {sistema:"Amadeus",codigo:"PRICE CHANGE",descricao_pt:"Mudança de preço",descricao_en:"Price has changed",solucao:"O valor da tarifa mudou desde a cotação. Refaça o pricing antes de emitir."},
+  {sistema:"Amadeus",codigo:"PAX NOT FOUND",descricao_pt:"Passageiro não encontrado",descricao_en:"Passenger not found",solucao:"Não foi localizado passageiro com esses dados. Verifique o número do PNR ou o nome."},
+  {sistema:"Amadeus",codigo:"CANCEL ONLY",descricao_pt:"Apenas cancelamento",descricao_en:"Cancel only",solucao:"Este segmento só pode ser cancelado"},
+  {sistema:"Amadeus",codigo:"NEED OSI",descricao_pt:"OSI obrigatório",descricao_en:"OSI element required",solucao:"Adicione o elemento OSI necessário antes de finalizar o PNR."},
+  {sistema:"Amadeus",codigo:"SSR DENIED",descricao_pt:"SSR negado pela cia",descricao_en:"SSR denied by airline",solucao:"A companhia aérea negou o serviço especial solicitado. Tente outro tipo ou contate a cia."},
+  {sistema:"Amadeus",codigo:"INFANT NOT ALLOWED",descricao_pt:"Bebê não permitido",descricao_en:"Infant not allowed on this fare",solucao:"A tarifa selecionada não permite bebê. Escolha outra tarifa."},
+  {sistema:"Amadeus",codigo:"MAX PAX",descricao_pt:"Número máximo de passageiros",descricao_en:"Maximum number of passengers exceeded",solucao:"O PNR atingiu o limite de passageiros permitidos. Crie um novo PNR."},
+  {sistema:"Amadeus",codigo:"ETK FAILED",descricao_pt:"Falha na emissão do e-ticket",descricao_en:"Electronic ticket issuance failed",solucao:"Verifique BSP"},
+  {sistema:"Amadeus",codigo:"VOID FAILED",descricao_pt:"Falha no void do bilhete",descricao_en:"Void ticket failed",solucao:"O void não foi realizado. Verifique se está dentro do prazo e tente novamente."},
+  {sistema:"Amadeus",codigo:"REFUND ERROR",descricao_pt:"Erro no reembolso",descricao_en:"Refund error",solucao:"Verifique as condições de reembolso da tarifa. Pode ser necessário contato com a cia aérea."},
+  {sistema:"Amadeus",codigo:"QUEUE FULL",descricao_pt:"Fila cheia",descricao_en:"Queue is full",solucao:"A fila está no limite de PNRs. Processe os itens existentes antes de adicionar novos."},
+  {sistema:"Amadeus",codigo:"PNR LOCKED",descricao_pt:"PNR bloqueado",descricao_en:"PNR is locked",solucao:"O PNR está sendo acessado por outro usuário. Aguarde e tente novamente."},
+  {sistema:"Amadeus",codigo:"NEED DOC",descricao_pt:"Documento obrigatório",descricao_en:"Document information required",solucao:"Insira os dados do documento do passageiro (DOCS SSR) antes de emitir."},
+  {sistema:"Amadeus",codigo:"CHNG NOT ALLOWED",descricao_pt:"Alteração não permitida",descricao_en:"Change not allowed",solucao:"A tarifa não permite alterações. Consulte as condições ou contate a companhia aérea."},
+  {sistema:"Amadeus",codigo:"ENDORSEMENT",descricao_pt:"Restrição de endosso",descricao_en:"Endorsement restriction",solucao:"O bilhete possui restrição de endosso. Não pode ser transferido para outra cia."},
+  {sistema:"Amadeus",codigo:"FORM OF PAYMENT",descricao_pt:"Forma de pagamento inválida",descricao_en:"Invalid form of payment",solucao:"Verifique os dados da forma de pagamento. Certifique-se que o cartão é aceito."},
+  {sistema:"Amadeus",codigo:"CREDIT CARD DECLINED",descricao_pt:"Cartão recusado",descricao_en:"Credit card declined",solucao:"O cartão foi recusado. Tente outro meio de pagamento ou contate o banco emissor."},
+  {sistema:"Amadeus",codigo:"IATA NOT VALID",descricao_pt:"IATA inválido",descricao_en:"IATA number not valid",solucao:"O número IATA informado não é válido para esta transação. Verifique com o administrador."},
+  {sistema:"Amadeus",codigo:"SEGMENT MISMATCH",descricao_pt:"Segmentos incompatíveis",descricao_en:"Segment mismatch",solucao:"Os segmentos selecionados não formam um itinerário válido. Revise a combinação."},
+  {sistema:"Amadeus",codigo:"STANDBY",descricao_pt:"Lista de espera",descricao_en:"Waitlist/Standby",solucao:"O passageiro foi colocado em lista de espera. Confirme quando houver disponibilidade."},
+  {sistema:"Amadeus",codigo:"ADV PURCHASE",descricao_pt:"Compra antecipada necessária",descricao_en:"Advance purchase required",solucao:"Esta tarifa exige compra com antecedência mínima. Escolha outra tarifa ou data."},
+  {sistema:"Amadeus",codigo:"MIN STAY",descricao_pt:"Estadia mínima",descricao_en:"Minimum stay required",solucao:"A tarifa exige estadia mínima no destino. Ajuste as datas ou escolha outra tarifa."},
+  {sistema:"Amadeus",codigo:"MAX STAY",descricao_pt:"Estadia máxima excedida",descricao_en:"Maximum stay exceeded",solucao:"A tarifa possui limite máximo de estadia. Ajuste as datas ou escolha outra tarifa."},
+  {sistema:"Amadeus",codigo:"NO THROUGH FARE",descricao_pt:"Sem tarifa combinada",descricao_en:"No through fare",solucao:"Não existe tarifa combinada para este itinerário. Cote os trechos separadamente."},
+  {sistema:"Amadeus",codigo:"STOPOVER NOT ALLOWED",descricao_pt:"Parada não permitida",descricao_en:"Stopover not allowed",solucao:"A tarifa não permite parada no ponto de conexão. Escolha outro itinerário."},
+  {sistema:"Amadeus",codigo:"OPEN JAW",descricao_pt:"Itinerário open jaw",descricao_en:"Open jaw itinerary",solucao:"Certifique-se que a tarifa permite open jaw. Caso contrário"},
+  {sistema:"Amadeus",codigo:"CURRENCY ERROR",descricao_pt:"Erro de moeda",descricao_en:"Currency error",solucao:"A moeda informada não é aceita para esta transação. Verifique a moeda correta."},
+  {sistema:"Amadeus",codigo:"TAX ERROR",descricao_pt:"Erro de taxas",descricao_en:"Tax calculation error",solucao:"Erro no cálculo de taxas. Refaça o pricing ou contate o suporte Amadeus."},
+  {sistema:"Amadeus",codigo:"BAGGAGE EXCEEDED",descricao_pt:"Excesso de bagagem",descricao_en:"Baggage allowance exceeded",solucao:"O peso ou número de volumes excede a franquia. Adicione excess baggage ou oriente o passageiro."},
+  {sistema:"Amadeus",codigo:"UPGRADE DENIED",descricao_pt:"Upgrade negado",descricao_en:"Upgrade request denied",solucao:"A solicitação de upgrade foi negada pela companhia aérea."},
+  {sistema:"Amadeus",codigo:"SEAT NOT AVAILABLE",descricao_pt:"Assento indisponível",descricao_en:"Seat not available",solucao:"O assento solicitado não está disponível. Escolha outro assento."},
+  {sistema:"Amadeus",codigo:"CHECK IN CLOSED",descricao_pt:"Check-in encerrado",descricao_en:"Check-in is closed",solucao:"O check-in para este voo já foi encerrado. Oriente o passageiro a comparecer ao balcão."},
+  {sistema:"Amadeus",codigo:"BOOKING CLASS",descricao_pt:"Classe de reserva inválida",descricao_en:"Invalid booking class",solucao:"A classe informada não existe ou não está disponível. Verifique as classes do voo."},
+  {sistema:"Amadeus",codigo:"REISSUE ERROR",descricao_pt:"Erro na reemissão",descricao_en:"Reissue error",solucao:"Verifique os dados do bilhete original"},
+  {sistema:"Amadeus",codigo:"EMD NOT FOUND",descricao_pt:"EMD não encontrado",descricao_en:"EMD not found",solucao:"O número de EMD informado não foi localizado. Verifique o número e tente novamente."},
+  {sistema:"Amadeus",codigo:"SPLIT NOT ALLOWED",descricao_pt:"Divisão não permitida",descricao_en:"PNR split not allowed",solucao:"Este PNR não pode ser dividido. Verifique as condições ou crie um novo PNR."},
+  {sistema:"Amadeus",codigo:"FLIFO ERROR",descricao_pt:"Erro nas informações de voo",descricao_en:"Flight information error",solucao:"Não foi possível obter as informações do voo. Tente novamente ou contate a companhia."},
+  {sistema:"Amadeus",codigo:"OSI TOO LONG",descricao_pt:"OSI muito longo",descricao_en:"OSI element too long",solucao:"O texto do OSI excede o limite de caracteres. Reduza o conteúdo."},
+  {sistema:"Amadeus",codigo:"NEED TL",descricao_pt:"Time limit necessário",descricao_en:"Ticketing time limit required",solucao:"Insira o time limit de emissão no PNR antes de finalizar."},
+  {sistema:"Amadeus",codigo:"WAITLIST CLOSED",descricao_pt:"Lista de espera encerrada",descricao_en:"Waitlist closed",solucao:"A lista de espera para este voo foi encerrada. Escolha outro voo."},
+  {sistema:"Amadeus",codigo:"CODESHARE",descricao_pt:"Voo compartilhado",descricao_en:"Codeshare flight",solucao:"Este é um voo compartilhado. Verifique a companhia operadora para procedimentos específicos."},
+  {sistema:"Amadeus",codigo:"INTERLINE NOT AGREED",descricao_pt:"Acordo interline inexistente",descricao_en:"Interline not agreed",solucao:"As companhias do itinerário não possuem acordo interline. Emita bilhetes separados."},
+  {sistema:"Sabre",codigo:"INVALID ENTRY",descricao_pt:"Entrada inválida",descricao_en:"Invalid entry",solucao:"Verifique a sintaxe do comando Sabre. Consulte o formato correto para a transação."},
+  {sistema:"Sabre",codigo:"NO AVAILABILITY",descricao_pt:"Sem disponibilidade",descricao_en:"No availability for this flight/class",solucao:"Não há assentos nesta classe. Tente outra classe ou voo alternativo."},
+  {sistema:"Sabre",codigo:"NEED PHONE",descricao_pt:"Telefone obrigatório",descricao_en:"Phone number required",solucao:"Adicione o elemento de telefone ao PNR com o comando 9 antes de finalizar."},
+  {sistema:"Sabre",codigo:"UNABLE TO TICKET",descricao_pt:"Não foi possível emitir",descricao_en:"Unable to ticket",solucao:"Verifique prazo de emissão"},
+  {sistema:"Sabre",codigo:"DUPLICATE BOOKING",descricao_pt:"Reserva duplicada",descricao_en:"Duplicate booking",solucao:"Já existe uma reserva para este passageiro neste voo. Cancele a duplicata antes de prosseguir."},
+  {sistema:"Sabre",codigo:"NAME REQUIRED",descricao_pt:"Nome obrigatório",descricao_en:"Passenger name required",solucao:"Insira o nome do passageiro antes de continuar com a reserva."},
+  {sistema:"Sabre",codigo:"PAST DATE",descricao_pt:"Data no passado",descricao_en:"Date is in the past",solucao:"A data informada já passou. Corrija para uma data futura."},
+  {sistema:"Sabre",codigo:"SEGMENT STATUS",descricao_pt:"Status de segmento inválido",descricao_en:"Invalid segment status",solucao:"O status do segmento não é válido para esta operação. Verifique o status atual."},
+  {sistema:"Sabre",codigo:"PRICE NOT FOUND",descricao_pt:"Preço não encontrado",descricao_en:"Price not found",solucao:"Nenhuma tarifa disponível. Tente datas diferentes ou outras classes tarifárias."},
+  {sistema:"Sabre",codigo:"FORMAT ERROR",descricao_pt:"Erro de formato",descricao_en:"Format error - check entry",solucao:"Comando digitado incorretamente. Verifique espaços"},
+  {sistema:"Sabre",codigo:"NOT AUTHORIZED",descricao_pt:"Não autorizado",descricao_en:"Not authorized for this transaction",solucao:"Sua credencial não tem permissão. Entre em contato com o administrador do sistema."},
+  {sistema:"Sabre",codigo:"QUEUE ERROR",descricao_pt:"Erro de fila",descricao_en:"Queue placement error",solucao:"Não foi possível colocar o PNR na fila. Verifique o número da fila e tente novamente."},
+  {sistema:"Sabre",codigo:"PNR NOT FOUND",descricao_pt:"PNR não encontrado",descricao_en:"Record locator not found",solucao:"O localizador informado não existe. Verifique e tente novamente."},
+  {sistema:"Sabre",codigo:"NEED DOCS",descricao_pt:"Documentos necessários",descricao_en:"Passenger document required",solucao:"Insira os dados do documento do passageiro com o comando SRDOCS antes de emitir."},
+  {sistema:"Sabre",codigo:"TICKET VOID FAILED",descricao_pt:"Void falhou",descricao_en:"Ticket void failed",solucao:"Verifique se está dentro do prazo de void e se o bilhete não foi utilizado."},
+  {sistema:"Sabre",codigo:"REFUND DENIED",descricao_pt:"Reembolso negado",descricao_en:"Refund not permitted",solucao:"A tarifa não permite reembolso. Consulte as regras tarifárias ou contate a companhia."},
+  {sistema:"Sabre",codigo:"CREDIT CARD DECLINED",descricao_pt:"Cartão recusado",descricao_en:"Credit card declined",solucao:"O cartão foi recusado. Tente outro meio de pagamento ou oriente o cliente a contatar o banco."},
+  {sistema:"Sabre",codigo:"IATA REQUIRED",descricao_pt:"IATA obrigatório",descricao_en:"IATA number required",solucao:"Insira o número IATA da agência para prosseguir com a emissão."},
+  {sistema:"Sabre",codigo:"CHANGE NOT PERMITTED",descricao_pt:"Alteração não permitida",descricao_en:"Change not permitted on this fare",solucao:"A tarifa não permite alterações. Consulte as condições da tarifa ou emita um novo bilhete."},
+  {sistema:"Sabre",codigo:"WAITLIST",descricao_pt:"Lista de espera",descricao_en:"Passenger placed on waitlist",solucao:"O passageiro foi colocado em lista de espera. Monitore e confirme quando houver vaga."},
+  {sistema:"Sabre",codigo:"INFANT RESTRICTION",descricao_pt:"Bebê não aceito",descricao_en:"Infant not accepted on this fare",solucao:"A tarifa não aceita bebê. Escolha outra tarifa ou classe."},
+  {sistema:"Sabre",codigo:"SEAT UNAVAILABLE",descricao_pt:"Assento indisponível",descricao_en:"Seat is not available",solucao:"O assento solicitado já foi ocupado. Escolha outro assento disponível."},
+  {sistema:"Sabre",codigo:"CHECK IN CLOSED",descricao_pt:"Check-in encerrado",descricao_en:"Check-in closed for this flight",solucao:"O check-in foi encerrado. Oriente o passageiro a ir ao balcão da companhia aérea."},
+  {sistema:"Sabre",codigo:"OSI FAILED",descricao_pt:"Falha no OSI",descricao_en:"OSI element failed",solucao:"Não foi possível inserir o OSI. Verifique o formato e a companhia aérea de destino."},
+  {sistema:"Sabre",codigo:"SSR DENIED",descricao_pt:"SSR negado",descricao_en:"SSR request denied by carrier",solucao:"A companhia negou o serviço especial. Tente outro tipo de SSR ou contate a companhia."},
+  {sistema:"Sabre",codigo:"UPGRADE FAILED",descricao_pt:"Upgrade falhou",descricao_en:"Upgrade request failed",solucao:"O upgrade não foi aprovado. Verifique disponibilidade ou solicite diretamente à companhia."},
+  {sistema:"Sabre",codigo:"FARE EXPIRED",descricao_pt:"Tarifa expirada",descricao_en:"Fare has expired",solucao:"A tarifa cotada expirou. Refaça a cotação para obter o valor atualizado."},
+  {sistema:"Sabre",codigo:"ENDORSEMENT BOX",descricao_pt:"Restrição de endosso",descricao_en:"Endorsement restriction applies",solucao:"O bilhete tem restrição de endosso. Não pode ser transferido para outra companhia."},
+  {sistema:"Sabre",codigo:"MAX PAX EXCEEDED",descricao_pt:"Limite de passageiros excedido",descricao_en:"Maximum passengers exceeded",solucao:"O PNR atingiu o máximo de passageiros. Crie um novo PNR para os demais."},
+  {sistema:"Sabre",codigo:"OPEN SEGMENT",descricao_pt:"Segmento aberto",descricao_en:"Open segment not allowed",solucao:"Segmentos abertos não são permitidos nesta operação. Confirme os voos antes de prosseguir."},
+  {sistema:"Sabre",codigo:"INTERLINE ERROR",descricao_pt:"Erro interline",descricao_en:"Interline agreement not found",solucao:"As companhias não têm acordo interline. Emita bilhetes separados para cada trecho."},
+  {sistema:"Sabre",codigo:"CURRENCY MISMATCH",descricao_pt:"Moeda incompatível",descricao_en:"Currency mismatch",solucao:"A moeda da forma de pagamento não coincide com a moeda da tarifa. Corrija antes de emitir."},
+  {sistema:"Sabre",codigo:"TAX OVERRIDE",descricao_pt:"Override de taxa",descricao_en:"Tax override required",solucao:"É necessário um override de taxa. Verifique com o supervisor antes de prosseguir."},
+  {sistema:"Sabre",codigo:"BAGGAGE ERROR",descricao_pt:"Erro de bagagem",descricao_en:"Baggage information error",solucao:"Não foi possível processar a bagagem. Verifique a franquia e tente novamente."},
+  {sistema:"Sabre",codigo:"CODESHARE RESTRICTION",descricao_pt:"Restrição de codeshare",descricao_en:"Codeshare restriction applies",solucao:"Este voo codeshare possui restrições. Verifique procedimentos com a cia operadora."},
+  {sistema:"Sabre",codigo:"SPLIT PNR FAILED",descricao_pt:"Divisão de PNR falhou",descricao_en:"PNR split failed",solucao:"Não foi possível dividir o PNR. Verifique se há segmentos confirmados e tente novamente."},
+  {sistema:"Sabre",codigo:"REISSUE FAILED",descricao_pt:"Reemissão falhou",descricao_en:"Reissue failed",solucao:"Verifique os dados do bilhete original e da nova tarifa. Refaça o processo de reemissão."},
+  {sistema:"Sabre",codigo:"EMD FAILED",descricao_pt:"EMD falhou",descricao_en:"EMD issuance failed",solucao:"Não foi possível emitir o EMD. Verifique os dados e tente novamente."},
+  {sistema:"Sabre",codigo:"BOOKING CLASS UNAVAILABLE",descricao_pt:"Classe indisponível",descricao_en:"Booking class unavailable",solucao:"A classe de reserva não está disponível. Tente outra classe ou voo."},
+  {sistema:"Sabre",codigo:"ADVANCE PURCHASE",descricao_pt:"Compra antecipada",descricao_en:"Advance purchase requirement not met",solucao:"Esta tarifa exige compra antecipada. Escolha outra tarifa ou ajuste a data."},
+  {sistema:"Sabre",codigo:"MIN STAY VIOLATION",descricao_pt:"Estadia mínima não cumprida",descricao_en:"Minimum stay requirement not met",solucao:"As datas não respeitam a estadia mínima da tarifa. Ajuste as datas de retorno."},
+  {sistema:"Sabre",codigo:"MAX STAY VIOLATION",descricao_pt:"Estadia máxima excedida",descricao_en:"Maximum stay requirement exceeded",solucao:"As datas excedem o limite de estadia da tarifa. Ajuste as datas ou escolha outra tarifa."},
+  {sistema:"Sabre",codigo:"NO THROUGH FARE",descricao_pt:"Sem tarifa de conexão",descricao_en:"No through fare applicable",solucao:"Não há tarifa combinada. Cote cada trecho separadamente."},
+  {sistema:"Sabre",codigo:"STOPOVER DENIED",descricao_pt:"Parada negada",descricao_en:"Stopover not permitted",solucao:"A tarifa não permite parada. Revise o itinerário ou escolha outra tarifa."},
+  {sistema:"Sabre",codigo:"ADC REQUIRED",descricao_pt:"ADC necessário",descricao_en:"Additional collection required",solucao:"Há diferença tarifária a cobrar. Calcule e cobre o ADC antes de reemitir."},
+  {sistema:"Sabre",codigo:"VOID PERIOD EXPIRED",descricao_pt:"Prazo de void expirado",descricao_en:"Void period has expired",solucao:"O prazo para void já passou. Será necessário fazer reembolso ou reemissão."},
+  {sistema:"Sabre",codigo:"TICKET NOT FOUND",descricao_pt:"Bilhete não encontrado",descricao_en:"Ticket number not found",solucao:"O número de bilhete informado não foi localizado. Verifique o número e tente novamente."},
+  {sistema:"Sabre",codigo:"RECORD LOCKED",descricao_pt:"Registro bloqueado",descricao_en:"Record is locked",solucao:"O PNR está sendo acessado por outro agente. Aguarde e tente novamente."},
+  {sistema:"Sabre",codigo:"NEED TL",descricao_pt:"Time limit necessário",descricao_en:"Ticketing time limit required",solucao:"Insira o time limit de emissão no PNR antes de finalizar."},
+  {sistema:"Sabre",codigo:"SEGMENT SOLD OUT",descricao_pt:"Segmento esgotado",descricao_en:"Segment sold out",solucao:"Não há mais vagas neste voo. Ofereça alternativas ao passageiro."},
+  {sistema:"Sabre",codigo:"INVALID FORM OF PAYMENT",descricao_pt:"Forma de pagamento inválida",descricao_en:"Invalid form of payment",solucao:"A forma de pagamento não é aceita. Verifique os dados ou tente outra forma de pagamento."},
+  {sistema:"Sabre",codigo:"COMMISSION ERROR",descricao_pt:"Erro de comissão",descricao_en:"Commission calculation error",solucao:"Erro no cálculo de comissão. Verifique o percentual e tente novamente."},
+  {sistema:"Sabre",codigo:"PLATING CARRIER",descricao_pt:"Cia de plating inválida",descricao_en:"Invalid plating carrier",solucao:"A companhia de plating não é válida para este bilhete. Corrija antes de emitir."},
+  {sistema:"Sabre",codigo:"FLIFO UNAVAILABLE",descricao_pt:"Informação de voo indisponível",descricao_en:"Flight information unavailable",solucao:"Não foi possível obter informações do voo no momento. Tente novamente mais tarde."},
+  {sistema:"Sabre",codigo:"SCHEDULE CHANGE",descricao_pt:"Mudança de horário",descricao_en:"Schedule change detected",solucao:"Houve alteração de horário neste voo. Notifique o passageiro e confirme os novos horários."},
+];
+
+function buscarErro() {
+  var q = document.getElementById('erroBusca').value.trim().toLowerCase();
+  var sistema = document.getElementById('erroSistema').value;
+  var resultados = document.getElementById('erroResultados');
+  var vazio = document.getElementById('erroVazio');
+  var lista = document.getElementById('erroLista');
+
+  var inicial = document.getElementById('erroInicial');
+  if (q.length < 2) {
+    lista.innerHTML = '';
+    resultados.style.display = 'none';
+    vazio.style.display = 'none';
+    if (inicial) inicial.style.display = 'block';
+    return;
+  }
+  if (inicial) inicial.style.display = 'none';
+
+  var filtrados = ERROS_GDS.filter(function(e) {
+    var matchSistema = !sistema || e.sistema === sistema;
+    var matchTexto = (
+      e.codigo.toLowerCase().includes(q) ||
+      e.descricao_pt.toLowerCase().includes(q) ||
+      e.descricao_en.toLowerCase().includes(q) ||
+      e.solucao.toLowerCase().includes(q)
+    );
+    return matchSistema && matchTexto;
+  });
+
+  resultados.style.display = 'block';
+
+  if (filtrados.length === 0) {
+    lista.innerHTML = '';
+    vazio.style.display = 'flex';
+    return;
+  }
+
+  vazio.style.display = 'none';
+  lista.innerHTML = filtrados.map(function(e) {
+    var corSys = e.sistema === 'Amadeus' ? '#4A9EFF' : '#F5821F';
+    var bgSys  = e.sistema === 'Amadeus' ? 'rgba(74,158,255,.12)' : 'rgba(245,130,31,.12)';
+    return '<div style="background:#1C2138;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:18px 20px;margin-bottom:12px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
+        '<span style="background:'+bgSys+';color:'+corSys+';font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;letter-spacing:.5px;">'+e.sistema+'</span>' +
+        '<span style="background:rgba(255,255,255,.06);color:#F0EEE8;font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;font-family:monospace;">'+e.codigo+'</span>' +
+      '</div>' +
+      '<div style="font-size:13px;color:#F0EEE8;font-weight:500;margin-bottom:4px;">'+e.descricao_pt+'</div>' +
+      '<div style="font-size:11px;color:#7A8099;margin-bottom:12px;font-style:italic;">'+e.descricao_en+'</div>' +
+      '<div style="font-size:12px;color:#7A8099;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Solução</div>' +
+      '<div style="font-size:13px;color:#3DD68C;line-height:1.6;">'+e.solucao+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+function limparBuscaErro() {
+  document.getElementById('erroBusca').value = '';
+  document.getElementById('erroResultados').style.display = 'none';
+  document.getElementById('erroLista').innerHTML = '';
+}
 </script>
 
 </body>
