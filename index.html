@@ -1,60 +1,115 @@
 <!DOCTYPE html>
-
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <title>Portal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  background:#0D1123;
+  color:white;
+  font-family:Arial;
+}
+.card {
+  background:#141929;
+  padding:30px;
+  border-radius:12px;
+  width:300px;
+  text-align:center;
+}
+input {
+  width:100%;
+  margin-bottom:10px;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+}
+button {
+  width:100%;
+  padding:10px;
+  background:#F5821F;
+  border:none;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+}
+</style>
 </head>
 
-<body style="margin:0;background:#0D1123;color:white;font-family:Arial;">
+<body>
 
+<!-- LOGIN -->
 <div id="loginScreen" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;">
-  <div style="background:#141929;padding:30px;border-radius:12px;width:300px;text-align:center;">
+  <div class="card">
     <h2>Login</h2>
-    <input id="user" placeholder="Email"><br><br>
-    <input id="pass" type="password" placeholder="Senha"><br><br>
+
+    <input id="user" placeholder="Email">
+    <input id="pass" type="password" placeholder="Senha">
+
     <button onclick="login()">Entrar</button>
+
     <p id="erro" style="color:red;"></p>
   </div>
 </div>
 
-<h1 style="text-align:center;margin-top:40px;">Sistema Liberado 🚀</h1>
+<!-- APP (ÁREA LOGADA) -->
+<div id="app" style="display:none; text-align:center; margin-top:40px;">
+  <h1>Sistema Liberado 🚀</h1>
+  <p>Bem-vindo ao sistema!</p>
 
+  <button onclick="logout()" style="width:auto;padding:10px 20px;">
+    Sair
+  </button>
+</div>
+
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-// NÃO usa variável global duplicável
-window.login = async function () {
-  const client = window.supabase.createClient(
-    "https://dgcswgwtylygpyqkpiol.supabase.co",
-    "sb_publishable_tNIleylQBeGasd8C6jYMmA_a8Rb0HbA"
-  );
+const SUPABASE_URL = "https://dgcswgwtylygpyqkpiol.supabase.co";
+const SUPABASE_KEY = "sb_publishable_tNIleylQBeGasd8C6jYMmA_a8Rb0HbA";
 
-  const email = document.getElementById("user").value;
-  const password = document.getElementById("pass").value;
+// cria apenas UMA instância
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const { error } = await client.auth.signInWithPassword({ email, password });
+// LOGIN
+window.login = async function() {
+  const email = document.getElementById("user").value.trim();
+  const password = document.getElementById("pass").value.trim();
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
   if (error) {
     document.getElementById("erro").innerText = "Login inválido";
   } else {
     document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
   }
 };
 
-window.addEventListener("load", async () => {
-  const client = window.supabase.createClient(
-    "https://dgcswgwtylygpyqkpiol.supabase.co",
-    "sb_publishable_tNIleylQBeGasd8C6jYMmA_a8Rb0HbA"
-  );
-
-  const { data } = await client.auth.getSession();
+// VERIFICA SESSÃO
+async function checkLogin() {
+  const { data } = await supabaseClient.auth.getSession();
 
   if (data.session) {
     document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
   }
-});
+}
+
+// LOGOUT
+window.logout = async function() {
+  await supabaseClient.auth.signOut();
+  location.reload();
+};
+
+// roda ao carregar
+window.addEventListener("load", checkLogin);
 </script>
 
 </body>
