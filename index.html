@@ -5220,18 +5220,35 @@ function buscarContextoBase(pergunta) {
         body: JSON.stringify(body)
       });
 
-      var data = await resp.json();
+      var rawText = await resp.text();
+      var data;
+      try {
+        data = JSON.parse(rawText);
+      } catch(e) {
+        if (loading.bubble._dotInterval) clearInterval(loading.bubble._dotInterval);
+        loading.div.remove();
+        addMsg('assistant', '⚠️ Resposta inválida do servidor: ' + rawText.substring(0, 200));
+        return;
+      }
 
       // Remove loading
       if (loading.bubble._dotInterval) clearInterval(loading.bubble._dotInterval);
       loading.div.remove();
+      
+      console.log('HTTP status:', resp.status, 'Data:', JSON.stringify(data).substring(0,200));
 
       if (data.error) {
-        addMsg('assistant', '⚠️ Erro: ' + data.error.message);
+        var errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : String(data.error);
+        addMsg('assistant', '⚠️ Erro da API: ' + errMsg);
         return;
       }
 
-      var resposta = data.content?.[0]?.text || 'Não foi possível obter resposta.';
+      // Debug: log full response
+      console.log('Claude response:', JSON.stringify(data).substring(0, 300));
+
+      var resposta = (data.content && data.content[0] && data.content[0].text)
+        ? data.content[0].text
+        : 'Não foi possível obter resposta. Resposta: ' + JSON.stringify(data).substring(0, 200);
 
       // Add to history (assistant response only - user message already added before fetch)
       historico.push({ role: 'model', parts: [{ text: resposta }] });
