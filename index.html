@@ -5054,24 +5054,42 @@ function v(id){var el=document.getElementById(id);return el?el.value:0;}
 
   var historico = [];
 
-  var SYSTEM_PROMPT = `Você é um assistente especializado em GDS (Global Distribution Systems), especificamente Amadeus e Sabre, e em procedimentos de aviação comercial.
+  var SYSTEM_PROMPT_BASE = `Você é um assistente especializado em GDS (Amadeus e Sabre) para agentes de viagem brasileiros.
 
-Você ajuda agentes de viagem brasileiros com:
-- Comandos e procedimentos do Amadeus e Sabre
-- Emissão, reemissão, void e reembolso de bilhetes
-- Políticas de bagagem das companhias aéreas
-- Tarifas, regras tarifárias e procedimentos especiais
-- Documentação e requisitos de entrada por destino
-- Procedimentos de reacomodação e IRROP
-- SSR, OSI e elementos especiais do PNR
-- Qualquer dúvida operacional de aviação
+REGRAS CRÍTICAS:
+1. Responda SEMPRE em português brasileiro
+2. Para comandos Amadeus e Sabre, use APENAS os comandos fornecidos no CONTEXTO DA BASE abaixo
+3. Se o comando não estiver na base, diga claramente: "Não tenho este comando validado na base. Recomendo consultar o manual oficial."
+4. Nunca invente ou suponha comandos GDS
+5. Seja direto e objetivo
+6. Quando mostrar comandos, use formato de código
 
-REGRAS IMPORTANTES:
-- Responda SEMPRE em português brasileiro
-- Seja direto e objetivo — agentes precisam de respostas rápidas
-- Quando mencionar comandos GDS, use formatação de código
-- Se não souber algo com certeza, diga claramente
-- Priorize informações práticas e acionáveis`;
+FORMATO DA RESPOSTA:
+- Se encontrou na base: responda com a solução + comando validado + indique [✅ Base validada]
+- Se não encontrou: responda com conhecimento geral + indique [⚠️ Consulte o manual oficial]`;
+
+function buscarContextoBase(pergunta) {
+  var q = pergunta.toLowerCase();
+  var resultados = ERROS_GDS.filter(function(e) {
+    return e.codigo.toLowerCase().includes(q) ||
+           e.descricao_pt.toLowerCase().includes(q) ||
+           e.descricao_en.toLowerCase().includes(q) ||
+           e.solucao.toLowerCase().includes(q) ||
+           (e.comando && e.comando.toLowerCase().includes(q));
+  }).slice(0, 5);
+
+  if (resultados.length === 0) return '';
+
+  var ctx = '\n\nCONTEXTO DA BASE VALIDADA (use estes dados para responder):\n';
+  resultados.forEach(function(e) {
+    ctx += '---\n';
+    ctx += 'Sistema: ' + e.sistema + '\n';
+    ctx += 'Erro: ' + e.codigo + ' — ' + e.descricao_pt + '\n';
+    ctx += 'Solução: ' + e.solucao + '\n';
+    ctx += 'Comando: ' + (e.comando || 'Ação manual necessária') + '\n';
+  });
+  return ctx;
+}
 
   function addMsg(role, texto, loading) {
     var container = document.getElementById('aiMensagens');
@@ -5141,7 +5159,11 @@ REGRAS IMPORTANTES:
     try {
 
       // Build messages in OpenAI format for Groq
-      var messages = [{ role: 'system', content: SYSTEM_PROMPT }];
+      // Search base for relevant context
+      var contexto = buscarContextoBase(texto);
+      var promptCompleto = SYSTEM_PROMPT_BASE + contexto;
+
+      var messages = [{ role: 'system', content: promptCompleto }];
       historico.forEach(function(h) {
         messages.push({
           role: h.role === 'model' ? 'assistant' : h.role,
