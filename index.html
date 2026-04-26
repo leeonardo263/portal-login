@@ -5199,6 +5199,33 @@ function buscarContextoBase(pergunta) {
 
       // Search base for relevant context
       var contexto = buscarContextoBase(texto);
+
+      // Also search procedimentos_gds in Supabase
+      try {
+        var q = texto.toLowerCase();
+        var palavras = q.split(' ').filter(function(p) { return p.length > 3; });
+        var filtro = palavras.map(function(p) {
+          return 'titulo.ilike.%' + p + '%,descricao.ilike.%' + p + '%,passos.ilike.%' + p + '%,comandos.ilike.%' + p + '%';
+        }).join(',');
+
+        var { data: procs } = await window._supabase
+          .from('procedimentos_gds')
+          .select('sistema,categoria,titulo,passos,comandos')
+          .or(filtro)
+          .limit(3);
+
+        if (procs && procs.length > 0) {
+          contexto += '\n\nPROCEDIMENTOS VALIDADOS DO PORTAL:\n';
+          procs.forEach(function(p) {
+            contexto += '---\n';
+            contexto += 'Sistema: ' + p.sistema + ' | ' + p.categoria + '\n';
+            contexto += 'Procedimento: ' + p.titulo + '\n';
+            contexto += 'Passos:\n' + p.passos + '\n';
+            contexto += 'Comandos:\n' + p.comandos + '\n';
+          });
+        }
+      } catch(e) { /* silencioso */ }
+
       var promptCompleto = SYSTEM_PROMPT_BASE + contexto;
 
       // Build messages for Claude
