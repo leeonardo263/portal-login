@@ -5049,8 +5049,8 @@ function v(id){var el=document.getElementById(id);return el?el.value:0;}
 <!-- ══ AI CHAT SCRIPT ══ -->
 <script>
 (function() {
-  const GEMINI_KEY = 'AIzaSyDkjsXLp7x5eo-XYtu0fDnDcRfgFn5Gq-c';
-  const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + GEMINI_KEY;
+  const GROQ_KEY = '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';
+  const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
   var historico = [];
 
@@ -5139,20 +5139,29 @@ REGRAS IMPORTANTES:
     var loading = addMsg('assistant', '', true);
 
     try {
-      // Inject system prompt as first user/model turn (v1 API doesn't support system_instruction)
-      var contents = [
-        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-        { role: 'model', parts: [{ text: 'Entendido! Estou pronto para ajudar agentes de viagem com dúvidas sobre GDS, Amadeus, Sabre, tarifas e procedimentos de aviação. Como posso ajudar?' }] },
-        ...historico
-      ];
+
+      // Build messages in OpenAI format for Groq
+      var messages = [{ role: 'system', content: SYSTEM_PROMPT }];
+      historico.forEach(function(h) {
+        messages.push({
+          role: h.role === 'model' ? 'assistant' : h.role,
+          content: h.parts[0].text
+        });
+      });
+
       var body = {
-        contents: contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+        model: 'llama3-70b-8192',
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 1024
       };
 
-      var resp = await fetch(GEMINI_URL, {
+      var resp = await fetch(GROQ_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + GROQ_KEY
+        },
         body: JSON.stringify(body)
       });
 
@@ -5163,11 +5172,11 @@ REGRAS IMPORTANTES:
       loading.div.remove();
 
       if (data.error) {
-        addMsg('assistant', '⚠️ Erro: ' + data.error.message + '. Verifique a chave de API.');
+        addMsg('assistant', '⚠️ Erro: ' + data.error.message);
         return;
       }
 
-      var resposta = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Não foi possível obter resposta.';
+      var resposta = data.choices?.[0]?.message?.content || 'Não foi possível obter resposta.';
 
       // Add to history
       historico.push({ role: 'model', parts: [{ text: resposta }] });
