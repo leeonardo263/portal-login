@@ -5139,9 +5139,14 @@ REGRAS IMPORTANTES:
     var loading = addMsg('assistant', '', true);
 
     try {
+      // Inject system prompt as first user/model turn (v1 API doesn't support system_instruction)
+      var contents = [
+        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+        { role: 'model', parts: [{ text: 'Entendido! Estou pronto para ajudar agentes de viagem com dúvidas sobre GDS, Amadeus, Sabre, tarifas e procedimentos de aviação. Como posso ajudar?' }] },
+        ...historico
+      ];
       var body = {
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: historico,
+        contents: contents,
         generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
       };
 
