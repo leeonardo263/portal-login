@@ -5049,8 +5049,8 @@ function v(id){var el=document.getElementById(id);return el?el.value:0;}
 <!-- ══ AI CHAT SCRIPT ══ -->
 <script>
 (function() {
-  const CLAUDE_KEY = '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';
-  const CLAUDE_URL = 'https://api.anthropic.com/v1/messages';
+  // Chave removida — requisições via proxy seguro
+  const CLAUDE_URL = '/api/chat'; // Proxy seguro Vercel
 
   var historico = [];
 
@@ -5215,10 +5215,7 @@ function buscarContextoBase(pergunta) {
       var resp = await fetch(CLAUDE_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': CLAUDE_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
       });
