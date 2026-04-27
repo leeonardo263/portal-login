@@ -171,7 +171,7 @@ main { padding: 2rem; max-width: 1300px; margin: 0 auto; }
 /* ── KPI CARDS ── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 2rem;
 }
@@ -384,6 +384,16 @@ tr:hover td { background: rgba(255,255,255,.02); }
           <div class="kpi-value" id="kpiUsuarios">—</div>
           <div class="kpi-sub">e-mails distintos</div>
         </div>
+        <div class="kpi-card pink" style="--pink:#FF6B9D;">
+          <div class="kpi-label" style="color:var(--muted)">Perguntas ao Chat IA</div>
+          <div class="kpi-value" id="kpiChat" style="color:#FF6B9D;">—</div>
+          <div class="kpi-sub">total de interações</div>
+        </div>
+        <div class="kpi-card gold" style="">
+          <div class="kpi-label" style="color:var(--muted)">Buscas de Erros GDS</div>
+          <div class="kpi-value" id="kpiErros" style="color:#E8C547;">—</div>
+          <div class="kpi-sub">via portal_eventos</div>
+        </div>
       </div>
 
       <!-- CHARTS -->
@@ -413,6 +423,24 @@ tr:hover td { background: rgba(255,255,255,.02); }
           </div>
         </div>
 
+      </div>
+
+      <!-- CHAT IA SECTION -->
+      <div class="charts-grid" style="margin-bottom:2rem;">
+        <div class="chart-card">
+          <div class="chart-title">Perguntas mais frequentes ao Chat IA</div>
+          <div class="chart-sub">Últimas 10 perguntas registradas</div>
+          <div id="chatList" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;">
+            <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">Carregando...</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Usuários mais ativos no Chat IA</div>
+          <div class="chart-sub">Por número de perguntas</div>
+          <div class="chart-wrap">
+            <canvas id="chartChatUsuarios"></canvas>
+          </div>
+        </div>
       </div>
 
       <!-- TABELA ÚLTIMOS EVENTOS -->
@@ -676,10 +704,11 @@ window.loadData = async function() {
   document.getElementById('loadingState').style.display = 'flex';
   document.getElementById('content').style.display = 'none';
 
-  const { data: eventos, error } = await _sb
-    .from('portal_eventos')
-    .select('*')
-    .order('criado_em', { ascending: false });
+  // Load portal_eventos and chat_historico in parallel
+  const [{ data: eventos, error }, { data: chats }] = await Promise.all([
+    _sb.from('portal_eventos').select('*').order('criado_em', { ascending: false }),
+    _sb.from('chat_historico').select('*').order('criado_em', { ascending: false })
+  ]);
 
   if (error || !eventos) {
     document.getElementById('loadingState').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Erro ao carregar dados.<br>Verifique as permissões no Supabase.</div></div>';
@@ -691,6 +720,40 @@ window.loadData = async function() {
 
   _todosEventos = eventos;
   popularSelectUsuarios(eventos);
+
+  // KPIs extras
+  const chatData = chats || [];
+  document.getElementById('kpiChat').innerText = chatData.length;
+  const errosBuscas = eventos.filter(e => e.tipo === 'busca_erro').length;
+  document.getElementById('kpiErros').innerText = errosBuscas;
+
+  // Chat IA list
+  const chatList = document.getElementById('chatList');
+  if (chatData.length === 0) {
+    chatList.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">Nenhuma interação ainda</div>';
+  } else {
+    chatList.innerHTML = chatData.slice(0, 10).map(c => {
+      const dt = new Date(c.criado_em);
+      const hora = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+      return '<div style="background:var(--surface2);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 14px;">' +
+        '<div style="font-size:12px;color:#F0EEE8;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">💬 ' + (c.pergunta || '—') + '</div>' +
+        '<div style="display:flex;justify-content:space-between;">' +
+          '<span style="font-size:11px;color:#7A8099;font-family:monospace;">' + (c.user_email || '—') + '</span>' +
+          '<span style="font-size:11px;color:#7A8099;">' + hora + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Chat por usuário chart
+  const chatPorUsuario = {};
+  chatData.forEach(c => { chatPorUsuario[c.user_email] = (chatPorUsuario[c.user_email] || 0) + 1; });
+  const chatOrdenado = Object.entries(chatPorUsuario).sort((a,b) => b[1]-a[1]).slice(0, 6);
+  buildBarChart('chartChatUsuarios',
+    chatOrdenado.map(x => x[0] ? x[0].split('@')[0] : '—'),
+    chatOrdenado.map(x => x[1]),
+    chatOrdenado.map(() => '#FF6B9D')
+  );
 
   const now = new Date();
   document.getElementById('lastUpdate').innerText =
