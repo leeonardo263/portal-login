@@ -423,6 +423,20 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
 .logout-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:#7A8099;cursor:pointer;transition:all .2s;}
 .logout-btn:hover{color:#F0EEE8;border-color:rgba(255,255,255,.2);}
 
+
+/* ── CARD BRAND SELECTOR ── */
+.tk-card-selector { display:none; margin-top:10px; padding:10px 14px; background:rgba(74,158,255,.07); border:1px solid rgba(74,158,255,.2); border-radius:8px; }
+.tk-card-selector.visible { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.tk-card-selector label { font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:#6BBEFF; white-space:nowrap; }
+.tk-card-select { background:rgba(74,158,255,.1); border:1.5px solid rgba(74,158,255,.3); border-radius:8px; padding:7px 12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:#F0EEE8; outline:none; cursor:pointer; transition:border-color .2s; }
+.tk-card-select:focus { border-color:#4A9EFF; }
+.tk-card-select option { background:#1C2138; color:#F0EEE8; }
+/* ── CARD BRAND SELECTOR ── */
+.brand-selector-wrap { margin-top:10px; padding:10px 14px; background:rgba(155,127,255,.07); border:1px solid rgba(155,127,255,.2); border-radius:8px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.brand-selector-wrap label { font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:#C4B0FF; white-space:nowrap; }
+.brand-select { background:rgba(155,127,255,.1); border:1.5px solid rgba(155,127,255,.3); border-radius:8px; padding:7px 12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:#F0EEE8; outline:none; cursor:pointer; transition:border-color .2s; }
+.brand-select:focus { border-color:#9B7FFF; }
+.brand-select option { background:#1C2138; color:#F0EEE8; }
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -437,6 +451,10 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
     <input id="loginPass" class="login-input" type="password" placeholder="Senha">
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-error" id="loginErro"></div>
+    <div id="localTestBtn" style="display:none;margin-top:16px;border-top:1px solid rgba(255,255,255,.07);padding-top:16px;">
+      <button onclick="bypassLogin()" style="width:100%;padding:10px;background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.3);border-radius:8px;color:#3DD68C;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(61,214,140,.25)'" onmouseout="this.style.background='rgba(61,214,140,.15)'">🧪 Entrar em modo teste (local)</button>
+      <div style="font-size:11px;color:#4A5568;text-align:center;margin-top:6px;">Visível apenas em ambiente local</div>
+    </div>
   </div>
 </div>
 
@@ -831,8 +849,26 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
           </select>
         </div>
         <div class="cia-info-box" id="cia_info_amadeus"></div>
+        <div id="tk_card_selector_amadeus" class="tk-card-selector">
+          <label>💳 Cartão TK:</label>
+          <select class="tk-card-select" id="tk_card_amadeus" onchange="updateCiaInfo('amadeus')">
+            <option value="TK05VI">Visa — TK05VI</option>
+            <option value="TK05MC">Mastercard — TK05MC</option>
+            <option value="TK05AX">Amex — TK05AX</option>
+            <option value="TK05EL">Elo — TK05EL</option>
+          </select>
+        </div>
         <div id="cia_multi_note_amadeus" style="font-size:11px;color:var(--muted);margin-top:6px;display:none;"></div>
         <div class="cia-maxp-warn" id="cia_warn_amadeus">⚠ Parcelas acima do máximo da CIA foram ajustadas automaticamente.</div>
+        <div class="brand-selector-wrap">
+          <label>💳 Bandeira:</label>
+          <select class="brand-select" id="brand_amadeus" onchange="calcA1();calcA2();calcA3();calcA4();">
+            <option value="VI">Visa</option>
+            <option value="CA">Mastercard</option>
+            <option value="AX">Amex</option>
+            <option value="EL">Elo</option>
+          </select>
+        </div>
         <div class="auth-field-wrap">
           <label>🔑 Autorização</label>
           <input type="text" id="auth_amadeus" placeholder="Ex: 123456 (opcional)" oninput="calcA1();calcA2();calcA3();calcA4();" maxlength="20">
@@ -959,8 +995,26 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
           </select>
         </div>
         <div class="cia-info-box" id="cia_info_sabre"></div>
+        <div id="tk_card_selector_sabre" class="tk-card-selector">
+          <label>💳 Cartão TK:</label>
+          <select class="tk-card-select" id="tk_card_sabre" onchange="updateCiaInfo('sabre')">
+            <option value="TK05VI">Visa — TK05VI</option>
+            <option value="TK05MC">Mastercard — TK05MC</option>
+            <option value="TK05AX">Amex — TK05AX</option>
+            <option value="TK05EL">Elo — TK05EL</option>
+          </select>
+        </div>
         <div id="cia_multi_note_sabre" style="font-size:11px;color:var(--muted);margin-top:6px;display:none;"></div>
         <div class="cia-maxp-warn" id="cia_warn_sabre">⚠ Parcelas acima do máximo da CIA foram ajustadas automaticamente.</div>
+        <div class="brand-selector-wrap">
+          <label>💳 Bandeira:</label>
+          <select class="brand-select" id="brand_sabre" onchange="calcS1();calcS2();calcS3();calcS4();">
+            <option value="VI">Visa</option>
+            <option value="CA">Mastercard</option>
+            <option value="AX">Amex</option>
+            <option value="EL">Elo</option>
+          </select>
+        </div>
         <div class="auth-field-wrap">
           <label>🔑 Autorização</label>
           <input type="text" id="auth_sabre" placeholder="Ex: 123456 (opcional)" oninput="calcS1();calcS2();calcS3();calcS4();" maxlength="20">
@@ -2893,7 +2947,7 @@ var CIA_DATA = {
 
 function getCiaData(sys){ return CIA_DATA[document.getElementById('cia_select_'+sys).value] || null; }
 
-function getOtato(cia, parc){
+function getOtato(cia, parc, sys){
   if(!cia) return 'YY';
   var dynamic = {
     'AR': function(p){ return 'AR'+String(p).padStart(2,'0'); },
@@ -2907,6 +2961,10 @@ function getOtato(cia, parc){
     'NH': function(p){ return p<=3?'NH205':'NH200'; },
   };
   var iata = Object.keys(CIA_DATA).find(function(k){ return CIA_DATA[k]===cia; }) || '';
+  if(iata === 'TK'){
+    var tkCard = document.getElementById('tk_card_'+(sys||'amadeus'));
+    return tkCard ? tkCard.value : 'TK05VI';
+  }
   if(dynamic[iata]) return dynamic[iata](parc);
   return cia.otato || 'YY';
 }
@@ -2917,7 +2975,10 @@ function updateCiaInfo(sys){
   var cia = getCiaData(sys);
   var infoBox = document.getElementById('cia_info_'+sys);
   var noteEl = document.getElementById('cia_multi_note_'+sys);
+  var tkSel = document.getElementById('tk_card_selector_'+sys);
   if(!infoBox) return;
+  var iataVal = document.getElementById('cia_select_'+sys).value;
+  if(tkSel){ if(iataVal==='TK'){ tkSel.classList.add('visible'); } else { tkSel.classList.remove('visible'); } }
   if(!cia){
     infoBox.innerHTML='<span style="color:var(--muted);font-size:12px;">Selecione uma CIA para ver limites e otato</span>';
     if(noteEl) noteEl.style.display='none';
@@ -2978,7 +3039,7 @@ function buildMSPL(sys, parc){
   var cia = getCiaData(sys);
   var p = padN(parc);
   var iata = cia ? Object.keys(CIA_DATA).find(function(k){return CIA_DATA[k]===cia;})||'' : '';
-  var ota = cia ? getOtato(cia, parc) : 'YY';
+  var ota = cia ? getOtato(cia, parc, sys) : 'YY';
   return {mspl:'MSPL'+p+'X', otato:ota, iata:iata};
 }
 
@@ -2997,6 +3058,20 @@ function renderCmd(el, label, rows){
     }).join('');
 }
 
+
+// ── BRAND PREFIX HELPERS ──
+function getAmadeusBrandPrefix(sys) {
+  var sel = document.getElementById('brand_' + (sys||'amadeus'));
+  var brand = sel ? sel.value : 'VI';
+  var map = { 'VI':'FPCCVI', 'CA':'FPCCCA', 'AX':'FPCCAX', 'EL':'FPCCEL' };
+  return map[brand] || 'FPCCVI';
+}
+function getSabreBrandPrefix(sys) {
+  var sel = document.getElementById('brand_' + (sys||'sabre'));
+  var brand = sel ? sel.value : 'VI';
+  var map = { 'VI':'FMPVI', 'CA':'FMPCA', 'AX':'FMPAX', 'EL':'FMPEL' };
+  return map[brand] || 'FMPVI';
+}
 // ── AMADEUS 1: Cartão Parcelado Sem Juros ──
 function calcA1(){
   var tAdt=+v('a1_tarifa_adt'), taxAdt=+v('a1_taxa_adt'), parc=+v('a1_parcelas');
@@ -3013,7 +3088,7 @@ function calcA1(){
     {label:'Parcela ADT',value:pAdt},{label:'1ª Parcela+Taxa ADT',value:p1Adt},
     {label:'Restante ADT',value:totRem_adt},{label:'Parcela Grupo Crédito',value:grpTotal}
   ]);
-  var CMD='FPCCCA552233333366663333/1010/BRL';
+  var CMD=getAmadeusBrandPrefix('amadeus')+'552233333366663333/1010/BRL';
   renderCmd(document.getElementById('a1_cmd'),'🖨️ Linhas de Comando — Amadeus | CIA: '+(cia?cia.name:'—')+' | Otato: '+ota,[
     {pax:'ADT',line:CMD+' '+fmt(p1Adt)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmt(grpTotal)+'/'+fmt(totRem_adt)},
     {pax:'CHD',line:CMD+' '+fmt(p1Chd)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmt(grpTotal)+'/'+fmt(totRem_chd)},
@@ -3037,7 +3112,7 @@ function calcA2(){
     {label:'Parcela c/Juros ADT',value:pAdt},{label:'1ª Parcela+Taxa ADT',value:p1Adt},
     {label:'Restante ADT',value:rem_adt},{label:'Parcela Grupo Crédito',value:grp}
   ]);
-  var CMD='FPCCCA552233333366663333/1010/BRL';
+  var CMD=getAmadeusBrandPrefix('amadeus')+'552233333366663333/1010/BRL';
   renderCmd(document.getElementById('a2_cmd'),'🖨️ Linhas de Comando — Amadeus Com Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+ota,[
     {pax:'ADT',line:CMD+' '+fmt(p1Adt)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmt(grp)+'/'+fmt(rem_adt)},
     {pax:'CHD',line:CMD+' '+fmt(pChd+0)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmt(grp)+'/'+fmt(tChd-pChd)},
@@ -3061,7 +3136,7 @@ function calcA3(){
     {label:'Parcela Cartão ADT',value:pAdt},{label:'Parcela Grupo Crédito',value:grp},
     {label:'Restante Cartão ADT',value:remAdt},{label:'Vlr Faturado ADT',value:fatAdt}
   ]);
-  var CMD='FPCASH+CCCA552233333366663333/1010/BRL';
+  var CMD='FPCASH+'+getAmadeusBrandPrefix('amadeus')+'552233333366663333/1010/BRL';
   renderCmd(document.getElementById('a3_cmd'),'🖨️ Linhas de Comando — Amadeus Faturado+Cartão | CIA: '+(cia?cia.name:'—')+' | Otato: '+ota,[
     {pax:'ADT',line:CMD+' '+fmt(pAdt)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmt(grp)+'/'+fmt(remAdt)},
     {pax:'CHD',line:CMD+' '+fmt(pChd)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmt(grp)+'/'+fmt(remChd)},
@@ -3083,7 +3158,7 @@ function calcA4(){
     {label:'Parcela c/Juros ADT',value:pAdt},{label:'Parcela Grupo Crédito',value:grp},
     {label:'Restante Cartão ADT',value:remAdt},{label:'Vlr Faturado ADT',value:fatAdt}
   ]);
-  var CMD='FPCASH+CCCA552233333366663333/1010/BRL';
+  var CMD='FPCASH+'+getAmadeusBrandPrefix('amadeus')+'552233333366663333/1010/BRL';
   renderCmd(document.getElementById('a4_cmd'),'🖨️ Linhas de Comando — Amadeus Fat+Cartão c/Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+ota,[
     {pax:'ADT',line:CMD+' '+fmt(pAdt)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmt(grp)+'/'+fmt(remAdt)},
   ]);
@@ -3105,11 +3180,11 @@ function calcS1(){
     {label:'Parcela ADT',value:pAdt},{label:'Restante ADT',value:remAdt},
     {label:'Parcela Grupo Crédito',value:grp}
   ]);
-  var CMD='FMPAX372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
+  var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s1_cmd'),'🖨️ Linhas de Comando — Sabre | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
-    {pax:'ADT',line:CMD+' '+fmt(grp)+'// '+fmt(remAdt)},
-    {pax:'CHD',line:CMD+' '+fmt(grp)+'// '+fmt(remChd)},
-    {pax:'INF',line:CMD+' '+fmt(grp)+'// '+fmt(remInf)},
+    {pax:'ADT',line:CMD+'x'+fmt(grp)+'// '+fmt(remAdt)},
+    {pax:'CHD',line:CMD+'x'+fmt(grp)+'// '+fmt(remChd)},
+    {pax:'INF',line:CMD+'x'+fmt(grp)+'// '+fmt(remInf)},
   ]);
 }
 
@@ -3129,11 +3204,11 @@ function calcS2(){
     {label:'Parcela c/Juros ADT',value:pAdt},{label:'Restante ADT',value:remAdt},
     {label:'Parcela Grupo Crédito',value:grp}
   ]);
-  var CMD='FMPAX372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
+  var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s2_cmd'),'🖨️ Linhas de Comando — Sabre c/Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
-    {pax:'ADT',line:CMD+' '+fmt(grp)+'// '+fmt(remAdt)},
-    {pax:'CHD',line:CMD+' '+fmt(grp)+'// '+fmt(remChd)},
-    {pax:'INF',line:CMD+' '+fmt(grp)+'// '+fmt(remInf)},
+    {pax:'ADT',line:CMD+'x'+fmt(grp)+'// '+fmt(remAdt)},
+    {pax:'CHD',line:CMD+'x'+fmt(grp)+'// '+fmt(remChd)},
+    {pax:'INF',line:CMD+'x'+fmt(grp)+'// '+fmt(remInf)},
   ]);
 }
 
@@ -3154,14 +3229,14 @@ function calcS3(){
     {label:'Parcela Cartão ADT',value:pAdt},{label:'Vlr Faturado ADT',value:fatAdt},
     {label:'Restante ADT',value:remAdt},{label:'Parcela Grupo Crédito',value:grp}
   ]);
-  var CMD='FMPAX372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
+  var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s3_cmd'),'🖨️ Linhas de Comando — Sabre Fat+Cartão | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
     {pax:'ADT',line:'50/* '+fmt(fatAdt)+' BRL (ENTER)'},
-    {pax:'ADT',line:CMD+' '+fmt(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+' XT'},
+    {pax:'ADT',line:CMD+'x'+fmt(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
     {pax:'CHD',line:'50/* '+fmt(fatChd)+' BRL (ENTER)'},
-    {pax:'CHD',line:CMD+' '+fmt(grp)+'// '+fmt(remChd)+'/0 XT'},
+    {pax:'CHD',line:CMD+'x'+fmt(grp)+'// '+fmt(remChd)+'/0XT'},
     {pax:'INF',line:'50/* '+fmt(fatInf)+' BRL (ENTER)'},
-    {pax:'INF',line:CMD+' '+fmt(grp)+'// '+fmt(remInf)+'/0 XT'},
+    {pax:'INF',line:CMD+'x'+fmt(grp)+'// '+fmt(remInf)+'/0XT'},
   ]);
 }
 
@@ -3180,10 +3255,10 @@ function calcS4(){
     {label:'1ª Parcela c/Juros ADT',value:pAdt},{label:'Vlr Faturado ADT',value:fatAdt},
     {label:'Restante ADT',value:remAdt},{label:'Parcela Grupo Crédito',value:grp}
   ]);
-  var CMD='FMPAX372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
+  var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s4_cmd'),'🖨️ Linhas de Comando — Sabre Fat+Cartão c/Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
     {pax:'ADT',line:'50/* '+fmt(fatAdt)+' BRL (ENTER)'},
-    {pax:'ADT',line:CMD+' '+fmt(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+' XT'},
+    {pax:'ADT',line:CMD+'x'+fmt(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
   ]);
 }
 
@@ -5397,7 +5472,20 @@ window.doLogout = async function() {
 window.addEventListener("load", async () => {
   const { data } = await _supabase.auth.getSession();
   if (data.session) { showPortal(); }
+  if (location.protocol === 'file:') {
+    var btn = document.getElementById('localTestBtn');
+    if (btn) btn.style.display = 'block';
+  }
 });
+
+window.bypassLogin = function() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('portalApp').style.display = 'block';
+  window._localTestMode = true;
+  setTimeout(function(){
+    if(typeof calcA1==='function'){ calcA1();calcA2();calcA3();calcA4();calcS1();calcS2();calcS3();calcS4(); }
+  }, 200);
+};
 </script>
 
 
@@ -5405,6 +5493,7 @@ window.addEventListener("load", async () => {
 <script>
 async function trackEvent(tipo, sistema, detalhe) {
   if (!window._supabase) return;
+  if (window._localTestMode) return;
   try {
     const { data: { session } } = await window._supabase.auth.getSession();
     const user_email = session ? session.user.email : 'anonimo';
