@@ -858,6 +858,15 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
             <option value="TK05EL">Elo — TK05EL</option>
           </select>
         </div>
+        <div id="am_card_selector_amadeus" class="tk-card-selector">
+          <label>💳 Cartão AM:</label>
+          <select class="tk-card-select" id="am_card_amadeus" onchange="updateCiaInfo('amadeus')">
+            <option value="AMVISA">Visa — AMVISA</option>
+            <option value="AMMAST">Mastercard — AMMAST</option>
+            <option value="AMAMEX">Amex — AMAMEX</option>
+            <option value="AMELO">Elo — AMELO</option>
+          </select>
+        </div>
         <div id="cia_multi_note_amadeus" style="font-size:11px;color:var(--muted);margin-top:6px;display:none;"></div>
         <div class="cia-maxp-warn" id="cia_warn_amadeus">⚠ Parcelas acima do máximo da CIA foram ajustadas automaticamente.</div>
         <div class="brand-selector-wrap">
@@ -1002,6 +1011,15 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
             <option value="TK05MC">Mastercard — TK05MC</option>
             <option value="TK05AX">Amex — TK05AX</option>
             <option value="TK05EL">Elo — TK05EL</option>
+          </select>
+        </div>
+        <div id="am_card_selector_sabre" class="tk-card-selector">
+          <label>💳 Cartão AM:</label>
+          <select class="tk-card-select" id="am_card_sabre" onchange="updateCiaInfo('sabre')">
+            <option value="AMVISA">Visa — AMVISA</option>
+            <option value="AMMAST">Mastercard — AMMAST</option>
+            <option value="AMAMEX">Amex — AMAMEX</option>
+            <option value="AMELO">Elo — AMELO</option>
           </select>
         </div>
         <div id="cia_multi_note_sabre" style="font-size:11px;color:var(--muted);margin-top:6px;display:none;"></div>
@@ -2965,6 +2983,10 @@ function getOtato(cia, parc, sys){
     var tkCard = document.getElementById('tk_card_'+(sys||'amadeus'));
     return tkCard ? tkCard.value : 'TK05VI';
   }
+  if(iata === 'AM'){
+    var amCard = document.getElementById('am_card_'+(sys||'amadeus'));
+    return amCard ? amCard.value : 'AMVISA';
+  }
   if(dynamic[iata]) return dynamic[iata](parc);
   return cia.otato || 'YY';
 }
@@ -2979,6 +3001,8 @@ function updateCiaInfo(sys){
   if(!infoBox) return;
   var iataVal = document.getElementById('cia_select_'+sys).value;
   if(tkSel){ if(iataVal==='TK'){ tkSel.classList.add('visible'); } else { tkSel.classList.remove('visible'); } }
+  var amSel = document.getElementById('am_card_selector_'+sys);
+  if(amSel){ if(iataVal==='AM'){ amSel.classList.add('visible'); } else { amSel.classList.remove('visible'); } }
   if(!cia){
     infoBox.innerHTML='<span style="color:var(--muted);font-size:12px;">Selecione uma CIA para ver limites e otato</span>';
     if(noteEl) noteEl.style.display='none';
@@ -3175,16 +3199,16 @@ function calcS1(){
   var remAdt=tAdt-pAdt, remChd=tChd-pChd, remInf=tInf-pInf;
   var grp=(pAdt*qAdt)+(pChd*qChd)+(pInf*qInf);
   var bm=buildMSPL('sabre',parc), mspl=bm.mspl, ota=bm.otato;
-  var otaPart=ota&&ota!=='YY'?ota:'';
+  var otaPart=ota&&ota!=='YY'?ota+'x':' ';
   renderResults(document.getElementById('s1_results'),[
     {label:'Parcela ADT',value:pAdt},{label:'Restante ADT',value:remAdt},
     {label:'Parcela Grupo Crédito',value:grp}
   ]);
   var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s1_cmd'),'🖨️ Linhas de Comando — Sabre | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
-    {pax:'ADT',line:CMD+'x'+fmt(grp)+'// '+fmt(remAdt)},
-    {pax:'CHD',line:CMD+'x'+fmt(grp)+'// '+fmt(remChd)},
-    {pax:'INF',line:CMD+'x'+fmt(grp)+'// '+fmt(remInf)},
+    {pax:'ADT',line:CMD+fmt(grp)+'// '+fmt(remAdt)},
+    {pax:'CHD',line:CMD+fmt(grp)+'// '+fmt(remChd)},
+    {pax:'INF',line:CMD+fmt(grp)+'// '+fmt(remInf)},
   ]);
 }
 
@@ -3199,16 +3223,16 @@ function calcS2(){
   var remAdt=tAdt-pAdt, remChd=tChd-pChd, remInf=tInf-pInf;
   var grp=(pAdt*qAdt)+(pChd*qChd)+(pInf*qInf);
   var bm=buildMSPL('sabre',parc), mspl=bm.mspl, ota=bm.otato;
-  var otaPart=ota&&ota!=='YY'?ota:'';
+  var otaPart=ota&&ota!=='YY'?ota+'x':' ';
   renderResults(document.getElementById('s2_results'),[
     {label:'Parcela c/Juros ADT',value:pAdt},{label:'Restante ADT',value:remAdt},
     {label:'Parcela Grupo Crédito',value:grp}
   ]);
   var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s2_cmd'),'🖨️ Linhas de Comando — Sabre c/Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
-    {pax:'ADT',line:CMD+'x'+fmt(grp)+'// '+fmt(remAdt)},
-    {pax:'CHD',line:CMD+'x'+fmt(grp)+'// '+fmt(remChd)},
-    {pax:'INF',line:CMD+'x'+fmt(grp)+'// '+fmt(remInf)},
+    {pax:'ADT',line:CMD+fmt(grp)+'// '+fmt(remAdt)},
+    {pax:'CHD',line:CMD+fmt(grp)+'// '+fmt(remChd)},
+    {pax:'INF',line:CMD+fmt(grp)+'// '+fmt(remInf)},
   ]);
 }
 
@@ -3224,7 +3248,7 @@ function calcS3(){
   var grp=(pAdt*qAdt);
   var remAdt=tAdt-pAdt, remChd=cartChd-pChd, remInf=cartInf-pInf;
   var bm=buildMSPL('sabre',parc), mspl=bm.mspl, ota=bm.otato;
-  var otaPart=ota&&ota!=='YY'?ota:'';
+  var otaPart=ota&&ota!=='YY'?ota+'x':' ';
   renderResults(document.getElementById('s3_results'),[
     {label:'Parcela Cartão ADT',value:pAdt},{label:'Vlr Faturado ADT',value:fatAdt},
     {label:'Restante ADT',value:remAdt},{label:'Parcela Grupo Crédito',value:grp}
@@ -3232,11 +3256,11 @@ function calcS3(){
   var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s3_cmd'),'🖨️ Linhas de Comando — Sabre Fat+Cartão | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
     {pax:'ADT',line:'50/* '+fmt(fatAdt)+' BRL (ENTER)'},
-    {pax:'ADT',line:CMD+'x'+fmt(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
+    {pax:'ADT',line:CMD+fmt(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
     {pax:'CHD',line:'50/* '+fmt(fatChd)+' BRL (ENTER)'},
-    {pax:'CHD',line:CMD+'x'+fmt(grp)+'// '+fmt(remChd)+'/0XT'},
+    {pax:'CHD',line:CMD+fmt(grp)+'// '+fmt(remChd)+'/0XT'},
     {pax:'INF',line:'50/* '+fmt(fatInf)+' BRL (ENTER)'},
-    {pax:'INF',line:CMD+'x'+fmt(grp)+'// '+fmt(remInf)+'/0XT'},
+    {pax:'INF',line:CMD+fmt(grp)+'// '+fmt(remInf)+'/0XT'},
   ]);
 }
 
@@ -3250,7 +3274,7 @@ function calcS4(){
   var grp=pAdt*qAdt;
   var remAdt=tAdt-pAdt;
   var bm=buildMSPL('sabre',parc), mspl=bm.mspl, ota=bm.otato;
-  var otaPart=ota&&ota!=='YY'?ota:'';
+  var otaPart=ota&&ota!=='YY'?ota+'x':' ';
   renderResults(document.getElementById('s4_results'),[
     {label:'1ª Parcela c/Juros ADT',value:pAdt},{label:'Vlr Faturado ADT',value:fatAdt},
     {label:'Restante ADT',value:remAdt},{label:'Parcela Grupo Crédito',value:grp}
@@ -3258,7 +3282,7 @@ function calcS4(){
   var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s4_cmd'),'🖨️ Linhas de Comando — Sabre Fat+Cartão c/Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
     {pax:'ADT',line:'50/* '+fmt(fatAdt)+' BRL (ENTER)'},
-    {pax:'ADT',line:CMD+'x'+fmt(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
+    {pax:'ADT',line:CMD+fmt(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
   ]);
 }
 
