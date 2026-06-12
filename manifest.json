@@ -1,0 +1,41 @@
+{
+  "name": "BeFly Travel — Portal GDS",
+  "short_name": "BeFly Portal",
+  "description": "Portal de Treinamento GDS — Amadeus, Sabre, Galileo, Calculadoras e mais.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D1123",
+  "theme_color": "#F5821F",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "shortcuts": [
+    {
+      "name": "Calculadora",
+      "short_name": "Calc",
+      "description": "Abrir calculadora de emissão",
+      "url": "/?modulo=calc"
+    },
+    {
+      "name": "Erros GDS",
+      "short_name": "Erros",
+      "description": "Buscar erros GDS",
+      "url": "/?modulo=erros"
+    }
+  ]
+}
