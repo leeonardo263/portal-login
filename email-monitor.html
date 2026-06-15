@@ -686,7 +686,18 @@
   <button class="filter-btn" data-filter="urgente">🔴 Urgente</button>
   <button class="filter-btn" data-filter="normal">🟡 Normal</button>
   <button class="filter-btn" data-filter="baixa">🟢 Baixa</button>
+  <button class="filter-btn" data-filter="nao-lido">🔵 Não lidos</button>
+  <button class="filter-btn" data-filter="respondido">✅ Respondidos</button>
   <div class="spacer"></div>
+  <div style="position:relative;">
+    <input type="text" id="searchInput" placeholder="🔍 Buscar por remetente ou assunto…"
+      style="background:var(--surface2);border:1px solid var(--border);color:var(--text);
+             border-radius:8px;padding:7px 14px;font-size:13px;width:260px;outline:none;
+             transition:border-color 0.15s;"
+      oninput="onSearch(this.value)"
+      onfocus="this.style.borderColor='var(--accent)'"
+      onblur="this.style.borderColor='var(--border)'">
+  </div>
   <button id="btnRefresh">
     <span class="spin" id="refreshIcon">↻</span> Atualizar emails
   </button>
@@ -720,6 +731,13 @@
     <div>
       <div class="stat-value" id="statBaixa">0</div>
       <div class="stat-label">Baixa</div>
+    </div>
+  </div>
+  <div class="stat">
+    <div class="stat-dot" style="background:var(--accent)"></div>
+    <div>
+      <div class="stat-value" id="statUnread">0</div>
+      <div class="stat-label">Não lidos</div>
     </div>
   </div>
 </div>
@@ -760,8 +778,12 @@
       scrolling="auto">
     </iframe>
 
-    <!-- BOTÃO RESPONDER -->
-    <button class="btn-reply" id="btnReply">↩ Responder</button>
+    <!-- AÇÕES DO EMAIL -->
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn-reply" id="btnReply" style="flex:1;margin-top:0;">↩ Responder</button>
+      <button class="btn-outline" id="btnMarkUnread" title="Marcar como não lido" style="padding:8px 14px;font-size:13px;">◉ Não lido</button>
+      <button class="btn-outline" id="btnArchive" title="Arquivar email" style="padding:8px 14px;font-size:13px;">🗄 Arquivar</button>
+    </div>
 
     <!-- ÁREA DE RESPOSTA -->
     <div class="reply-area" id="replyArea">
@@ -884,11 +906,15 @@ async function loadEmails() {
 
   try {
     const res = await fetch(
-      'https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$top=20&$orderby=receivedDateTime desc&$select=id,subject,from,receivedDateTime,bodyPreview,body,isRead',
+      'https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$top=50&$orderby=receivedDateTime desc&$select=id,subject,from,receivedDateTime,bodyPreview,body,isRead',
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
     const data = await res.json();
     if (!data.value) throw new Error('Sem emails');
+
+    // Preserve replied state across refreshes
+    const prevReplied = {};
+    allEmails.forEach(e => { if (e.replied) prevReplied[e.id] = true; });
 
     allEmails = data.value.map(m => ({
       id:       m.id,
@@ -899,6 +925,7 @@ async function loadEmails() {
       body:     m.body?.content || m.bodyPreview || '',
       time:     m.receivedDateTime,
       isRead:   m.isRead,
+      replied:  prevReplied[m.id] || false,
       category: null,
       priority: null,
       summary:  null,
@@ -929,12 +956,30 @@ async function loadEmails() {
 // ── RENDER ───────────────────────────────────────────────────────
 function renderCards(emails) {
   const grid = document.getElementById('emailsGrid');
-  const filtered = activeFilter === 'todos'
-    ? emails
-    : emails.filter(e => e.priority === activeFilter);
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+
+  let filtered = emails;
+
+  // Filter by priority/status
+  if (activeFilter === 'urgente' || activeFilter === 'normal' || activeFilter === 'baixa') {
+    filtered = filtered.filter(e => e.priority === activeFilter);
+  } else if (activeFilter === 'nao-lido') {
+    filtered = filtered.filter(e => !e.isRead);
+  } else if (activeFilter === 'respondido') {
+    filtered = filtered.filter(e => e.replied);
+  }
+
+  // Filter by search
+  if (search) {
+    filtered = filtered.filter(e =>
+      e.from.toLowerCase().includes(search) ||
+      e.fromAddr.toLowerCase().includes(search) ||
+      e.subject.toLowerCase().includes(search)
+    );
+  }
 
   if (filtered.length === 0) {
-    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h2>Nenhum email nesta categoria</h2></div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h2>Nenhum email encontrado</h2><p style="color:var(--text-muted);font-size:13px;">${search ? 'Tente outro termo de busca.' : 'Nenhum email nesta categoria.'}</p></div>`;
     return;
   }
 
@@ -950,6 +995,10 @@ function renderCards(emails) {
   });
 }
 
+function onSearch(val) {
+  renderCards(allEmails);
+}
+
 function buildCard(e) {
   const initials = e.from.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
   const timeStr  = formatTime(e.time);
@@ -960,14 +1009,21 @@ function buildCard(e) {
     ? e.summary
     : '<span style="opacity:0.5;font-style:italic;">Analisando com IA…</span>';
   const summaryClass = e.summary ? '' : 'loading';
+  const repliedBadge = e.replied
+    ? '<span style="font-size:10px;background:rgba(62,207,142,0.15);color:#3ecf8e;border-radius:20px;padding:2px 8px;font-weight:700;">✅ Respondido</span>'
+    : '';
+  const unreadDot = !e.isRead
+    ? '<span style="width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;flex-shrink:0;"></span>'
+    : '';
 
   return `
-  <div class="email-card ${pClass}" data-id="${e.id}">
+  <div class="email-card ${pClass}${e.replied ? ' replied' : ''}" data-id="${e.id}" style="${e.isRead ? 'opacity:0.85;' : ''}">
     <div class="card-avatar">${initials}</div>
     <div class="card-body">
       <div class="card-top">
-        <div class="card-from">${esc(e.from)}</div>
-        ${!e.isRead ? '<span style="width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;flex-shrink:0;"></span>' : ''}
+        <div class="card-from" style="font-weight:${e.isRead ? '500' : '700'}">${esc(e.from)}</div>
+        ${unreadDot}
+        ${repliedBadge}
       </div>
       <div class="card-subject">${esc(e.subject)}</div>
       <div class="card-summary ${summaryClass}" id="summary-${e.id}">${summaryContent}</div>
@@ -1076,6 +1132,9 @@ function updateStats() {
   document.getElementById('statUrgente').textContent = allEmails.filter(e => e.priority === 'urgente').length;
   document.getElementById('statNormal').textContent  = allEmails.filter(e => e.priority === 'normal').length;
   document.getElementById('statBaixa').textContent   = allEmails.filter(e => e.priority === 'baixa').length;
+  const unread = allEmails.filter(e => !e.isRead).length;
+  const statUnread = document.getElementById('statUnread');
+  if (statUnread) statUnread.textContent = unread;
 }
 
 // ── FILTROS ──────────────────────────────────────────────────────
@@ -1131,6 +1190,28 @@ async function openModal(email) {
 
   // Reset reply area
   currentEmailForReply = email;
+
+  // Mark as read locally + via Graph API
+  if (!email.isRead) {
+    email.isRead = true;
+    const cardEl = document.querySelector(`[data-id="${email.id}"]`);
+    if (cardEl) {
+      const dot = cardEl.querySelector('span[style*="border-radius:50%"]');
+      if (dot) dot.remove();
+      cardEl.style.opacity = '0.85';
+      const fromEl = cardEl.querySelector('.card-from');
+      if (fromEl) fromEl.style.fontWeight = '500';
+    }
+    updateStats();
+    // Graph API call (fire and forget)
+    if (accessToken) {
+      fetch(`https://graph.microsoft.com/v1.0/me/messages/${email.id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isRead: true })
+      }).catch(() => {});
+    }
+  }
   document.getElementById('replyArea').classList.remove('open');
   document.getElementById('btnReply').style.display = 'flex';
   document.getElementById('replyText').value = '';
@@ -1329,6 +1410,22 @@ document.getElementById('btnSendReply').addEventListener('click', async () => {
       document.getElementById('replyArea').classList.remove('open');
       document.getElementById('btnReply').style.display = 'flex';
       document.getElementById('replyText').value = '';
+      // Mark as replied
+      if (currentEmailForReply) {
+        currentEmailForReply.replied = true;
+        const cardEl = document.querySelector(`[data-id="${currentEmailForReply.id}"]`);
+        if (cardEl) {
+          cardEl.classList.add('replied');
+          const top = cardEl.querySelector('.card-top');
+          if (top && !top.querySelector('.replied-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'replied-badge';
+            badge.style.cssText = 'font-size:10px;background:rgba(62,207,142,0.15);color:#3ecf8e;border-radius:20px;padding:2px 8px;font-weight:700;';
+            badge.textContent = '✅ Respondido';
+            top.appendChild(badge);
+          }
+        }
+      }
     } else {
       const err = await res.json();
       throw new Error(err.error?.message || 'Erro ao enviar');
@@ -1366,6 +1463,63 @@ document.getElementById('btnEditSig').addEventListener('click', () => {
 document.getElementById('sigOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('sigOverlay'))
     document.getElementById('sigOverlay').classList.remove('open');
+});
+
+
+// ── ARQUIVAR / MARCAR NÃO LIDO ──────────────────────────────────
+document.getElementById('btnArchive').addEventListener('click', async () => {
+  if (!currentEmailForReply || !accessToken) return;
+  const btn = document.getElementById('btnArchive');
+  btn.textContent = '⏳…';
+  btn.disabled = true;
+  try {
+    const res = await fetch(
+      `https://graph.microsoft.com/v1.0/me/messages/${currentEmailForReply.id}/move`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destinationId: 'archive' })
+      }
+    );
+    if (res.ok) {
+      showToast('🗄 Email arquivado!');
+      // Remove from list
+      allEmails = allEmails.filter(e => e.id !== currentEmailForReply.id);
+      document.getElementById('modalOverlay').classList.remove('open');
+      renderCards(allEmails);
+      updateStats();
+    } else {
+      throw new Error('Erro ao arquivar');
+    }
+  } catch(e) {
+    showToast('Erro: ' + e.message);
+  } finally {
+    btn.textContent = '🗄 Arquivar';
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('btnMarkUnread').addEventListener('click', async () => {
+  if (!currentEmailForReply || !accessToken) return;
+  try {
+    await fetch(`https://graph.microsoft.com/v1.0/me/messages/${currentEmailForReply.id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isRead: false })
+    });
+    currentEmailForReply.isRead = false;
+    const cardEl = document.querySelector(`[data-id="${currentEmailForReply.id}"]`);
+    if (cardEl) {
+      cardEl.style.opacity = '1';
+      const fromEl = cardEl.querySelector('.card-from');
+      if (fromEl) fromEl.style.fontWeight = '700';
+    }
+    showToast('◉ Marcado como não lido');
+    document.getElementById('modalOverlay').classList.remove('open');
+    updateStats();
+  } catch(e) {
+    showToast('Erro ao marcar como não lido');
+  }
 });
 
 // Checa se voltou do redirect OAuth
