@@ -3124,9 +3124,9 @@ function calcA1(){
   ]);
   var CMD=getAmadeusBrandPrefix('amadeus')+'552233333366663333/1010/BRL';
   renderCmd(document.getElementById('a1_cmd'),'🖨️ Linhas de Comando — Amadeus | CIA: '+(cia?cia.name:'—')+' | Otato: '+ota,[
-    {pax:'ADT',line:CMD+' '+fmt(p1Adt)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grpTotal)+'/'+fmt(totRem_adt)},
-    {pax:'CHD',line:CMD+' '+fmt(p1Chd)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grpTotal)+'/'+fmt(totRem_chd)},
-    {pax:'INF',line:CMD+' '+fmt(p1Inf)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grpTotal)+'/'+fmt(totRem_inf)},
+    {pax:'ADT',line:CMD+fmt(p1Adt)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grpTotal)+'/'+fmt(totRem_adt)},
+    {pax:'CHD',line:CMD+fmt(p1Chd)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grpTotal)+'/'+fmt(totRem_chd)},
+    {pax:'INF',line:CMD+fmt(p1Inf)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grpTotal)+'/'+fmt(totRem_inf)},
   ]);
 }
 
@@ -3148,9 +3148,9 @@ function calcA2(){
   ]);
   var CMD=getAmadeusBrandPrefix('amadeus')+'552233333366663333/1010/BRL';
   renderCmd(document.getElementById('a2_cmd'),'🖨️ Linhas de Comando — Amadeus Com Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+ota,[
-    {pax:'ADT',line:CMD+' '+fmt(p1Adt)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grp)+'/'+fmt(rem_adt)},
-    {pax:'CHD',line:CMD+' '+fmt(pChd+0)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grp)+'/'+fmt(tChd-pChd)},
-    {pax:'INF',line:CMD+' '+fmt(pInf+0)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grp)+'/'+fmt(tInf-pInf)},
+    {pax:'ADT',line:CMD+fmt(p1Adt)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grp)+'/'+fmt(rem_adt)},
+    {pax:'CHD',line:CMD+fmt(pChd+0)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grp)+'/'+fmt(tChd-pChd)},
+    {pax:'INF',line:CMD+fmt(pInf+0)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grp)+'/'+fmt(tInf-pInf)},
   ]);
 }
 
@@ -3172,9 +3172,9 @@ function calcA3(){
   ]);
   var CMD='FPCASH+'+getAmadeusBrandPrefix('amadeus')+'552233333366663333/1010/BRL';
   renderCmd(document.getElementById('a3_cmd'),'🖨️ Linhas de Comando — Amadeus Faturado+Cartão | CIA: '+(cia?cia.name:'—')+' | Otato: '+ota,[
-    {pax:'ADT',line:CMD+' '+fmt(pAdt)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grp)+'/'+fmt(remAdt)},
-    {pax:'CHD',line:CMD+' '+fmt(pChd)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grp)+'/'+fmt(remChd)},
-    {pax:'INF',line:CMD+' '+fmt(pInf)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grp)+'/'+fmt(remInf)},
+    {pax:'ADT',line:CMD+fmt(pAdt)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grp)+'/'+fmt(remAdt)},
+    {pax:'CHD',line:CMD+fmt(pChd)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grp)+'/'+fmt(remChd)},
+    {pax:'INF',line:CMD+fmt(pInf)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grp)+'/'+fmt(remInf)},
   ]);
 }
 
@@ -3194,7 +3194,7 @@ function calcA4(){
   ]);
   var CMD='FPCASH+'+getAmadeusBrandPrefix('amadeus')+'552233333366663333/1010/BRL';
   renderCmd(document.getElementById('a4_cmd'),'🖨️ Linhas de Comando — Amadeus Fat+Cartão c/Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+ota,[
-    {pax:'ADT',line:CMD+' '+fmt(pAdt)+authPartA('amadeus')+' +'+mspl+ota+'X '+fmtOtato(grp)+'/'+fmt(remAdt)},
+    {pax:'ADT',line:CMD+fmt(pAdt)+authPartA('amadeus')+'+'+mspl+ota+'X'+fmtOtato(grp)+'/'+fmt(remAdt)},
   ]);
 }
 
@@ -3216,9 +3216,9 @@ function calcS1(){
   ]);
   var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s1_cmd'),'🖨️ Linhas de Comando — Sabre | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
-    {pax:'ADT',line:CMD+fmtOtato(grp)+'// '+fmt(remAdt)},
-    {pax:'CHD',line:CMD+fmtOtato(grp)+'// '+fmt(remChd)},
-    {pax:'INF',line:CMD+fmtOtato(grp)+'// '+fmt(remInf)},
+    {pax:'ADT',line:CMD+fmtOtato(grp)+'//'+fmt(remAdt)},
+    {pax:'CHD',line:CMD+fmtOtato(grp)+'//'+fmt(remChd)},
+    {pax:'INF',line:CMD+fmtOtato(grp)+'//'+fmt(remInf)},
   ]);
 }
 
@@ -3240,9 +3240,9 @@ function calcS2(){
   ]);
   var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s2_cmd'),'🖨️ Linhas de Comando — Sabre c/Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
-    {pax:'ADT',line:CMD+fmtOtato(grp)+'// '+fmt(remAdt)},
-    {pax:'CHD',line:CMD+fmtOtato(grp)+'// '+fmt(remChd)},
-    {pax:'INF',line:CMD+fmtOtato(grp)+'// '+fmt(remInf)},
+    {pax:'ADT',line:CMD+fmtOtato(grp)+'//'+fmt(remAdt)},
+    {pax:'CHD',line:CMD+fmtOtato(grp)+'//'+fmt(remChd)},
+    {pax:'INF',line:CMD+fmtOtato(grp)+'//'+fmt(remInf)},
   ]);
 }
 
@@ -3266,11 +3266,11 @@ function calcS3(){
   var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s3_cmd'),'🖨️ Linhas de Comando — Sabre Fat+Cartão | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
     {pax:'ADT',line:'50/* '+fmt(fatAdt)+' BRL (ENTER)'},
-    {pax:'ADT',line:CMD+fmtOtato(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
+    {pax:'ADT',line:CMD+fmtOtato(grp)+'//'+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
     {pax:'CHD',line:'50/* '+fmt(fatChd)+' BRL (ENTER)'},
-    {pax:'CHD',line:CMD+fmtOtato(grp)+'// '+fmt(remChd)+'/0XT'},
+    {pax:'CHD',line:CMD+fmtOtato(grp)+'//'+fmt(remChd)+'/0XT'},
     {pax:'INF',line:'50/* '+fmt(fatInf)+' BRL (ENTER)'},
-    {pax:'INF',line:CMD+fmtOtato(grp)+'// '+fmt(remInf)+'/0XT'},
+    {pax:'INF',line:CMD+fmtOtato(grp)+'//'+fmt(remInf)+'/0XT'},
   ]);
 }
 
@@ -3292,7 +3292,7 @@ function calcS4(){
   var CMD=getSabreBrandPrefix('sabre')+'372044444444444/1012'+authPartS('sabre')+'*'+mspl+otaPart;
   renderCmd(document.getElementById('s4_cmd'),'🖨️ Linhas de Comando — Sabre Fat+Cartão c/Juros | CIA: '+(cia?cia.name:'—')+' | Otato: '+(ota||'—'),[
     {pax:'ADT',line:'50/* '+fmt(fatAdt)+' BRL (ENTER)'},
-    {pax:'ADT',line:CMD+fmtOtato(grp)+'// '+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
+    {pax:'ADT',line:CMD+fmtOtato(grp)+'//'+fmt(remAdt)+'/'+fmt(taxAdt)+'XT'},
   ]);
 }
 
