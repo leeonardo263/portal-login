@@ -470,6 +470,158 @@
       line-height: 1.6;
     }
 
+
+    /* ── RESPOSTA ── */
+    .reply-area {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .reply-area.open { display: block; }
+
+    .reply-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .reply-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .reply-toolbar-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .reply-textarea {
+      width: 100%;
+      min-height: 160px;
+      background: var(--surface);
+      color: var(--text);
+      border: none;
+      padding: 14px;
+      font-size: 13px;
+      font-family: var(--font);
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+    }
+
+    .reply-signature {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--surface2);
+      white-space: pre-wrap;
+    }
+
+    .reply-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-send {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-send:hover { background: var(--accent2); }
+    .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-outline {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
+
+    .btn-reply {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 14px;
+      width: 100%;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-reply:hover { background: var(--border); border-color: var(--accent); }
+
+    /* ── MODAL ASSINATURA ── */
+    .sig-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .sig-overlay.open { display: flex; }
+    .sig-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+    }
+    .sig-modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .sig-modal p  { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+    .sig-textarea {
+      width: 100%;
+      min-height: 120px;
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-family: var(--font);
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      margin-bottom: 14px;
+    }
+    .sig-footer { display: flex; gap: 8px; justify-content: flex-end; }
+
     /* ── TOAST ── */
     #toast {
       position: fixed;
@@ -607,6 +759,39 @@
       style="width:100%;min-height:300px;border:none;border-radius:8px;background:#fff;"
       scrolling="auto">
     </iframe>
+
+    <!-- BOTÃO RESPONDER -->
+    <button class="btn-reply" id="btnReply">↩ Responder</button>
+
+    <!-- ÁREA DE RESPOSTA -->
+    <div class="reply-area" id="replyArea">
+      <div class="reply-toolbar">
+        <span class="reply-label">↩ Respondendo</span>
+        <div class="reply-toolbar-btns">
+          <button class="btn-outline" id="btnGenerateDraft">✨ Gerar rascunho com IA</button>
+          <button class="btn-outline" id="btnEditSig">✏️ Minha assinatura</button>
+        </div>
+      </div>
+      <textarea class="reply-textarea" id="replyText" placeholder="Digite sua resposta aqui…"></textarea>
+      <div class="reply-signature" id="replySignaturePreview"></div>
+      <div class="reply-footer">
+        <button class="btn-outline" onclick="document.getElementById('replyArea').classList.remove('open');document.getElementById('btnReply').style.display='flex';">Cancelar</button>
+        <button class="btn-send" id="btnSendReply">✉️ Enviar resposta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ASSINATURA -->
+<div class="sig-overlay" id="sigOverlay">
+  <div class="sig-modal">
+    <h3>✏️ Minha Assinatura</h3>
+    <p>Esta assinatura será adicionada automaticamente nas suas respostas.</p>
+    <textarea class="sig-textarea" id="sigTextarea" placeholder="Ex: Att,&#10;Leonardo Cerqueira&#10;BeFly Travel — (11) 4004-0003"></textarea>
+    <div class="sig-footer">
+      <button class="btn-outline" onclick="document.getElementById('sigOverlay').classList.remove('open')">Cancelar</button>
+      <button class="btn-send" onclick="saveSignature()">Salvar</button>
+    </div>
   </div>
 </div>
 
@@ -618,7 +803,7 @@
 const CLIENT_ID    = 'dccdd43c-cd27-499e-aa07-1668c98c8b1c';
 const TENANT_ID    = 'consumers'; // contas pessoais @outlook.com / @hotmail.com
 const REDIRECT_URI = window.location.origin + window.location.pathname;
-const SCOPES       = ['openid','profile','email','Mail.Read','Mail.Read.Shared'];
+const SCOPES       = ['openid','profile','email','Mail.Read','Mail.Read.Shared','Mail.Send'];
 
 // ── ESTADO ──────────────────────────────────────────────────────
 let accessToken  = null;
@@ -944,6 +1129,13 @@ async function openModal(email) {
   // Busca anexos
   await loadAttachments(email.id);
 
+  // Reset reply area
+  currentEmailForReply = email;
+  document.getElementById('replyArea').classList.remove('open');
+  document.getElementById('btnReply').style.display = 'flex';
+  document.getElementById('replyText').value = '';
+  updateSigPreview();
+
   document.getElementById('modalOverlay').classList.add('open');
 }
 
@@ -1046,6 +1238,136 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3200);
 }
+
+
+// ── RESPOSTA ─────────────────────────────────────────────────────
+let currentEmailForReply = null;
+
+// Abre área de resposta
+document.getElementById('btnReply').addEventListener('click', () => {
+  document.getElementById('replyArea').classList.add('open');
+  document.getElementById('btnReply').style.display = 'none';
+  document.getElementById('replyText').value = '';
+  updateSigPreview();
+  document.getElementById('replyText').focus();
+});
+
+// Gera rascunho com IA
+document.getElementById('btnGenerateDraft').addEventListener('click', async () => {
+  if (!currentEmailForReply) return;
+  const btn = document.getElementById('btnGenerateDraft');
+  btn.textContent = '⏳ Gerando…';
+  btn.disabled = true;
+
+  const prompt = `Você é um agente de atendimento da BeFly Travel, agência de viagens.
+Escreva uma resposta profissional em português para o email abaixo.
+A resposta deve ser objetiva, cordial e resolver ou encaminhar a solicitação do cliente.
+Não inclua saudação final nem assinatura — isso será adicionado automaticamente.
+
+Categoria do email: ${currentEmailForReply.category || 'Não definida'}
+Remetente: ${currentEmailForReply.from}
+Assunto: ${currentEmailForReply.subject}
+Resumo IA: ${currentEmailForReply.summary || ''}
+Corpo: ${currentEmailForReply.preview?.substring(0, 600) || ''}
+
+Escreva APENAS o corpo da resposta, sem assunto, sem saudação final, sem assinatura.`;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('') || '';
+    document.getElementById('replyText').value = text.trim();
+  } catch(e) {
+    showToast('Erro ao gerar rascunho.');
+  } finally {
+    btn.textContent = '✨ Gerar rascunho com IA';
+    btn.disabled = false;
+  }
+});
+
+// Envia resposta
+document.getElementById('btnSendReply').addEventListener('click', async () => {
+  if (!currentEmailForReply || !accessToken) return;
+  const body = document.getElementById('replyText').value.trim();
+  if (!body) { showToast('Digite uma resposta antes de enviar.'); return; }
+
+  const sig = localStorage.getItem('bf_email_signature') || '';
+  const fullBody = sig ? `${body}\n\n${sig}` : body;
+  const htmlBody = fullBody.replace(/
+/g, '<br>');
+
+  const btn = document.getElementById('btnSendReply');
+  btn.textContent = '⏳ Enviando…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(
+      `https://graph.microsoft.com/v1.0/me/messages/${currentEmailForReply.id}/reply`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: {
+            body: { contentType: 'HTML', content: htmlBody }
+          }
+        })
+      }
+    );
+
+    if (res.ok || res.status === 202) {
+      showToast('✅ Resposta enviada com sucesso!');
+      document.getElementById('replyArea').classList.remove('open');
+      document.getElementById('btnReply').style.display = 'flex';
+      document.getElementById('replyText').value = '';
+    } else {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'Erro ao enviar');
+    }
+  } catch(e) {
+    showToast('Erro ao enviar: ' + e.message);
+  } finally {
+    btn.textContent = '✉️ Enviar resposta';
+    btn.disabled = false;
+  }
+});
+
+// ── ASSINATURA ───────────────────────────────────────────────────
+function updateSigPreview() {
+  const sig = localStorage.getItem('bf_email_signature') || '';
+  const el = document.getElementById('replySignaturePreview');
+  if (sig) { el.textContent = '— \n' + sig; el.style.display = 'block'; }
+  else { el.style.display = 'none'; }
+}
+
+function saveSignature() {
+  const sig = document.getElementById('sigTextarea').value.trim();
+  localStorage.setItem('bf_email_signature', sig);
+  document.getElementById('sigOverlay').classList.remove('open');
+  updateSigPreview();
+  showToast('Assinatura salva!');
+}
+
+document.getElementById('btnEditSig').addEventListener('click', () => {
+  const sig = localStorage.getItem('bf_email_signature') || '';
+  document.getElementById('sigTextarea').value = sig;
+  document.getElementById('sigOverlay').classList.add('open');
+});
+
+document.getElementById('sigOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('sigOverlay'))
+    document.getElementById('sigOverlay').classList.remove('open');
+});
 
 // Checa se voltou do redirect OAuth
 (function checkRedirectToken() {
