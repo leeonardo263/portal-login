@@ -596,8 +596,17 @@
     <div class="modal-section-label">Resumo da IA</div>
     <div class="modal-summary-box" id="modalSummary">—</div>
     <hr class="modal-divider"/>
+    <div id="modalAttachments" style="display:none;">
+      <div class="modal-section-label">📎 Anexos</div>
+      <div id="modalAttachmentsList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+      <hr class="modal-divider"/>
+    </div>
     <div class="modal-section-label">Corpo do Email</div>
-    <div class="modal-body-text" id="modalBodyText">—</div>
+    <iframe id="modalBodyIframe"
+      sandbox="allow-same-origin"
+      style="width:100%;min-height:300px;border:none;border-radius:8px;background:#fff;"
+      scrolling="auto">
+    </iframe>
   </div>
 </div>
 
@@ -802,7 +811,7 @@ function showSkeletons() {
 // ── ANÁLISE IA ───────────────────────────────────────────────────
 async function analyzeEmail(email) {
   const categories = [
-    'Cancelamento','Reembolso','Reemissão','Reclamação',
+    'Emissão','Cancelamento','Reembolso','Reemissão','Reclamação',
     'Cotação','Dúvida Geral','Waiver / Irregularidade','Documentação / Visto'
   ];
 
@@ -816,6 +825,15 @@ Analise este email e responda SOMENTE em JSON válido, sem markdown, sem explica
 }
 
 Categorias disponíveis: ${categories.join(', ')}
+
+Definições importantes para categorização correta:
+- Emissão: solicitação de emissão/ticketing de um bilhete novo, primeira emissão de um LOC/PNR
+- Reemissão: troca, alteração ou reemissão de um bilhete JÁ emitido anteriormente (menciona bilhete existente, mudança de data/rota/nome)
+- Cancelamento: pedido de cancelamento de reserva ou bilhete
+- Reembolso: pedido de devolução de valor pago
+- Waiver / Irregularidade: irregularidade operacional, voo cancelado pela cia, waiver disponível
+- Cotação: pedido de orçamento ou pesquisa de tarifas
+- Documentação / Visto: dúvidas sobre documentos, vistos, passaporte
 
 Critérios de prioridade:
 - urgente: voo nas próximas 48h, reclamação grave, waiver expirando
@@ -888,11 +906,10 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 document.getElementById('btnRefresh').addEventListener('click', loadEmails);
 
 // ── MODAL ────────────────────────────────────────────────────────
-function openModal(email) {
+async function openModal(email) {
   document.getElementById('modalTitle').textContent = email.subject;
   document.getElementById('modalFrom').textContent  = `${email.from} <${email.fromAddr}> · ${formatTime(email.time)}`;
   document.getElementById('modalSummary').textContent = email.summary || 'Analisando…';
-  document.getElementById('modalBodyText').textContent = stripHtml(email.body);
 
   const badges = document.getElementById('modalBadges');
   const pClass = email.priority || 'baixa';
@@ -900,7 +917,90 @@ function openModal(email) {
     <span class="badge-priority ${pClass}">${capitalize(email.priority || 'baixa')}</span>
     <span class="badge-category">${esc(email.category || '…')}</span>`;
 
+  // Renderiza corpo do email no iframe
+  const iframe = document.getElementById('modalBodyIframe');
+  const bodyHtml = email.body || '<p style="color:#666">Sem conteúdo.</p>';
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+  iframeDoc.open();
+  iframeDoc.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 13px; color: #222;
+             margin: 12px 16px; line-height: 1.6; word-break: break-word; }
+      img { max-width: 100%; height: auto; }
+      a { color: #1a73e8; }
+      table { max-width: 100%; }
+    </style></head><body>${bodyHtml}</body></html>`);
+  iframeDoc.close();
+
+  // Ajusta altura do iframe ao conteúdo
+  setTimeout(() => {
+    try {
+      const h = iframeDoc.body.scrollHeight;
+      iframe.style.height = Math.min(Math.max(h + 20, 200), 600) + 'px';
+    } catch(e) {}
+  }, 150);
+
+  // Busca anexos
+  await loadAttachments(email.id);
+
   document.getElementById('modalOverlay').classList.add('open');
+}
+
+async function loadAttachments(emailId) {
+  const container = document.getElementById('modalAttachments');
+  const list = document.getElementById('modalAttachmentsList');
+  container.style.display = 'none';
+  list.innerHTML = '';
+
+  if (!accessToken) return;
+
+  try {
+    const res = await fetch(
+      `https://graph.microsoft.com/v1.0/me/messages/${emailId}/attachments?$select=id,name,contentType,size,contentBytes`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const data = await res.json();
+    if (!data.value || data.value.length === 0) return;
+
+    container.style.display = 'block';
+    list.innerHTML = data.value.map(att => {
+      const sizeKb = Math.round(att.size / 1024);
+      const icon = att.contentType?.includes('pdf') ? '📄'
+                 : att.contentType?.includes('image') ? '🖼️'
+                 : att.contentType?.includes('word') ? '📝'
+                 : att.contentType?.includes('sheet') || att.contentType?.includes('excel') ? '📊'
+                 : '📎';
+      return `<div style="
+        display:flex;align-items:center;gap:8px;
+        background:var(--surface2);border:1px solid var(--border);
+        border-radius:8px;padding:8px 12px;cursor:pointer;
+        font-size:12px;transition:border-color 0.15s;"
+        onclick="downloadAttachment('${att.id}','${esc(att.name)}','${att.contentType}','${att.contentBytes || ''}')"
+        onmouseover="this.style.borderColor='var(--accent)'"
+        onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:18px">${icon}</span>
+        <div>
+          <div style="font-weight:600;color:var(--text)">${esc(att.name)}</div>
+          <div style="color:var(--text-muted)">${sizeKb} KB</div>
+        </div>
+        <span style="margin-left:4px;color:var(--accent2)">⬇</span>
+      </div>`;
+    }).join('');
+  } catch(e) { /* silencioso */ }
+}
+
+function downloadAttachment(id, name, contentType, contentBytes) {
+  if (!contentBytes) { showToast('Conteúdo do anexo não disponível.'); return; }
+  const binary = atob(contentBytes);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const blob = new Blob([bytes], { type: contentType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 document.getElementById('modalClose').addEventListener('click', () => {
