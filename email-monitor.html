@@ -1410,10 +1410,11 @@ document.getElementById('btnSendReply').addEventListener('click', async () => {
       document.getElementById('replyArea').classList.remove('open');
       document.getElementById('btnReply').style.display = 'flex';
       document.getElementById('replyText').value = '';
-      // Mark as replied
+      // Mark as replied + auto-archive
       if (currentEmailForReply) {
         currentEmailForReply.replied = true;
-        const cardEl = document.querySelector(`[data-id="${currentEmailForReply.id}"]`);
+        const emailId = currentEmailForReply.id;
+        const cardEl = document.querySelector(`[data-id="${emailId}"]`);
         if (cardEl) {
           cardEl.classList.add('replied');
           const top = cardEl.querySelector('.card-top');
@@ -1425,6 +1426,16 @@ document.getElementById('btnSendReply').addEventListener('click', async () => {
             top.appendChild(badge);
           }
         }
+        // Auto-archive after 1s
+        setTimeout(async () => {
+          const ok = await archiveEmail(emailId);
+          if (ok) {
+            allEmails = allEmails.filter(e => e.id !== emailId);
+            renderCards(allEmails);
+            updateStats();
+            showToast('🗄 Email arquivado automaticamente.');
+          }
+        }, 1000);
       }
     } else {
       const err = await res.json();
@@ -1467,36 +1478,50 @@ document.getElementById('sigOverlay').addEventListener('click', e => {
 
 
 // ── ARQUIVAR / MARCAR NÃO LIDO ──────────────────────────────────
+async function archiveEmail(emailId) {
+  if (!accessToken) return false;
+  try {
+    // Get archive folder ID first
+    const folderRes = await fetch(
+      'https://graph.microsoft.com/v1.0/me/mailFolders/archive',
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    let folderId = 'archive';
+    if (folderRes.ok) {
+      const folder = await folderRes.json();
+      folderId = folder.id;
+    }
+    const res = await fetch(
+      `https://graph.microsoft.com/v1.0/me/messages/${emailId}/move`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destinationId: folderId })
+      }
+    );
+    return res.ok;
+  } catch(e) {
+    return false;
+  }
+}
+
 document.getElementById('btnArchive').addEventListener('click', async () => {
   if (!currentEmailForReply || !accessToken) return;
   const btn = document.getElementById('btnArchive');
   btn.textContent = '⏳…';
   btn.disabled = true;
-  try {
-    const res = await fetch(
-      `https://graph.microsoft.com/v1.0/me/messages/${currentEmailForReply.id}/move`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ destinationId: 'archive' })
-      }
-    );
-    if (res.ok) {
-      showToast('🗄 Email arquivado!');
-      // Remove from list
-      allEmails = allEmails.filter(e => e.id !== currentEmailForReply.id);
-      document.getElementById('modalOverlay').classList.remove('open');
-      renderCards(allEmails);
-      updateStats();
-    } else {
-      throw new Error('Erro ao arquivar');
-    }
-  } catch(e) {
-    showToast('Erro: ' + e.message);
-  } finally {
-    btn.textContent = '🗄 Arquivar';
-    btn.disabled = false;
+  const ok = await archiveEmail(currentEmailForReply.id);
+  if (ok) {
+    showToast('🗄 Email arquivado!');
+    allEmails = allEmails.filter(e => e.id !== currentEmailForReply.id);
+    document.getElementById('modalOverlay').classList.remove('open');
+    renderCards(allEmails);
+    updateStats();
+  } else {
+    showToast('Erro ao arquivar. Verifique as permissões.');
   }
+  btn.textContent = '🗄 Arquivar';
+  btn.disabled = false;
 });
 
 document.getElementById('btnMarkUnread').addEventListener('click', async () => {
