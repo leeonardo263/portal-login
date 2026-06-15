@@ -1300,9 +1300,8 @@ document.getElementById('btnSendReply').addEventListener('click', async () => {
   if (!body) { showToast('Digite uma resposta antes de enviar.'); return; }
 
   const sig = localStorage.getItem('bf_email_signature') || '';
-  const fullBody = sig ? `${body}\n\n${sig}` : body;
-  const htmlBody = fullBody.replace(/
-/g, '<br>');
+  const fullBody = sig ? body + "\n\n" + sig : body;
+  const htmlBody = fullBody.replace(/\r?\n/g, '<br>');
 
   const btn = document.getElementById('btnSendReply');
   btn.textContent = '⏳ Enviando…';
@@ -1346,7 +1345,7 @@ document.getElementById('btnSendReply').addEventListener('click', async () => {
 function updateSigPreview() {
   const sig = localStorage.getItem('bf_email_signature') || '';
   const el = document.getElementById('replySignaturePreview');
-  if (sig) { el.textContent = '— \n' + sig; el.style.display = 'block'; }
+  if (sig) { el.textContent = '—\n' + sig; el.style.display = 'block'; }
   else { el.style.display = 'none'; }
 }
 
