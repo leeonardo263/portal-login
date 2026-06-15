@@ -1301,7 +1301,7 @@ document.getElementById('btnSendReply').addEventListener('click', async () => {
 
   const sig = localStorage.getItem('bf_email_signature') || '';
   const fullBody = sig ? body + "\n\n" + sig : body;
-  const htmlBody = fullBody.replace(/\r?\n/g, '<br>');
+  const htmlBody = fullBody.split('\n').join('<br>').split('\r').join('');
 
   const btn = document.getElementById('btnSendReply');
   btn.textContent = '⏳ Enviando…';
