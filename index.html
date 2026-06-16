@@ -2730,117 +2730,33 @@ function searchSabreCmd(q){
   var box = document.getElementById('sabreCmdResultBox');
   if(!q.trim()){box.classList.remove('show');return;}
   var qu = q.toUpperCase().trim();
+  // Busca exata
   var exact = SABRE_CMDS.find(function(c){return c.cmd===qu;});
   if(exact){showSabreCmd(exact.cmd);return;}
+  // Busca parcial pelo código
   var partial = SABRE_CMDS.find(function(c){return c.cmd.startsWith(qu);});
   if(partial){showSabreCmd(partial.cmd);return;}
-  var terms = q.toLowerCase().split(' ');
-  var byDesc = SABRE_CMDS.find(function(c){
-    var hay = (c.cmd+' '+c.title+' '+c.desc).toLowerCase();
-    return terms.every(function(t){return hay.indexOf(t)!==-1;});
+  // Busca fuzzy por título/descrição/categoria
+  var norm = normalizeStr(q);
+  var terms = norm.split(' ').filter(function(t){return t.length>0;});
+  var scored = [];
+  SABRE_CMDS.forEach(function(c){
+    var normCmd = normalizeStr(c.cmd);
+    var hay = normalizeStr(c.cmd+' '+c.title+' '+c.desc+' '+c.cat);
+    var total = 0;
+    var allMatch = terms.every(function(t){
+      if(t.length <= 5 && normCmd.startsWith(t)){ total += 80; return true; }
+      var s = fuzzyScore(hay, t);
+      total += s;
+      return s > 0;
+    });
+    if(allMatch) scored.push({cmd:c.cmd, score:total});
   });
-  if(byDesc){showSabreCmd(byDesc.cmd);return;}
+  scored.sort(function(a,b){return b.score-a.score;});
+  if(scored.length){ showSabreCmd(scored[0].cmd); return; }
   box.classList.remove('show');
 }
 
-// BANCO DE COMANDOS AMADEUS (baseado no Manual do Usuário)
-// ══════════════════════════════════════════════════════
-const AMADEUS_CMDS = [
-  // ─── PNR / NOMES ───
-  {cmd:"NM",title:"Nome do Passageiro",cat:"PNR",desc:"Elemento mandatório do PNR. Inclui o nome do passageiro com sobrenome, primeiro nome e título. Adultos usam MR/MRS/MS. Menores usam (CHD/DDMMMAA). Infantes usam (INF/NOME/DDMMMAA). UMNR usa código (Uxx) onde xx é a idade.",syntax:[{label:"Adulto único",code:"NM1SILVA/JULIOMR",note:"Um passageiro adulto"},{label:"Dois de mesmo sobrenome",code:"NM2PINTO/ANAMRS/LUIZMR",note:"Dois pax, mesmo sobrenome"},{label:"Menor com nascimento",code:"NM1ANDRADE/CAROLINAMISS(CHD/12SEP01)",note:"CHD com data de nascimento"},{label:"Infante",code:"NM1BORBA/DENISEMRS(INF/KARINAMISS/31MAR07)",note:"Adulto com colo"},{label:"UMNR",code:"NM1SANTOS/JOSEMSTR(U09)",note:"Menor desacompanhado de 9 anos"}],related:["SS","SR","SP","NU"]},
-  {cmd:"NU",title:"Modificar Nome",cat:"PNR",desc:"Permite modificar elementos nominais já inseridos no PNR. Pode ajustar sobrenome, primeiro nome ou adicionar/remover indicação CHD e INF.",syntax:[{label:"Ajustar sobrenome pax 2",code:"NU2/1SOUZA/JOSEMR",note:""},{label:"Ajustar primeiro nome pax 2",code:"NU2/MARY MRS",note:""}],related:["NM"]},
-  {cmd:"SS",title:"Segmento de Voo / Venda",cat:"PNR",desc:"Elemento mandatório do PNR. Usado para vender voos (entrada curta ou longa), registrar chegada desconhecida (ARNK), segmento em aberto (OPEN) e reservas passivas (PK/GK/HK).",syntax:[{label:"Venda curta — 1 lugar, classe Y, opção 1",code:"SS1Y1",note:"A partir de disponibilidade"},{label:"Venda longa",code:"SSAF006 F 22NOV CDGJFK NN1",note:"Voo AF006, classe F, 22NOV"},{label:"ARNK",code:"SI ARNK",note:"Chegada desconhecida"},{label:"OPEN",code:"SO AF C JFKCDG",note:"Segmento em aberto"},{label:"Passivo (PK)",code:"SSAA904J25DECGIGMIAPK1/22550420/BIYULT",note:"Com horário e localizador"},{label:"Ghost (GK)",code:"SSRG2100Y20DECCGHPOAGK1/YCR2TE",note:"Sem mensagem para a cia"}],related:["SB","SX","XI","RS"]},
-  {cmd:"AP",title:"Contato (Telefone / E-mail)",cat:"PNR",desc:"Elemento mandatório do PNR. Registra informações de contato: telefone da agência, contato residencial (H), comercial (B), FAX (F) ou e-mail (E). Se não incluído, o Amadeus insere automaticamente o contato da agência.",syntax:[{label:"Agência",code:"AP RIO TOURS 2221 2133 A/C ANA.AGT",note:""},{label:"Residencial",code:"AP JAU (14) 622 3344-H",note:"H = home"},{label:"E-mail itinerário",code:"APE-NOME@EMPRESA.COM",note:"Envio de itinerário via e-mail"}],related:["RF","TK"]},
-  {cmd:"RF",title:"Origem do PNR",cat:"PNR",desc:"Elemento mandatório do PNR. Indica quem criou ou modificou o PNR. Só um elemento por transação. Após o final de transação, é transferido para o histórico. O sistema elimina espaços em branco — use ponto ou traço como separador.",syntax:[{label:"Registrar agente",code:"RF LUCIO.AGT",note:"Nome do agente responsável"}],related:["ET","ER","RH"]},
-  {cmd:"TK",title:"Prazo de Emissão / Bilhete Emitido",cat:"PNR",desc:"Elemento mandatório. TKTL define o prazo para emissão — o PNR vai para fila da agência na data/hora indicada. TKXL cancela automaticamente o PNR. TKOK indica que o bilhete já foi emitido.",syntax:[{label:"Prazo — fila da agência",code:"TKTL19SEP/1600",note:"PNR vai para fila às 16h do dia 19SEP"},{label:"Prazo com escritório",code:"TKTL19SEP/1600/RIOB22181",note:"Fila de escritório específico"},{label:"Cancelamento automático",code:"TKXL19SEP/1200",note:"PNR cancelado na hora/data"},{label:"Bilhete emitido",code:"TKOK",note:"Indica que o bilhete já foi emitido"}],related:["AP","RF","FH"]},
-  {cmd:"RM",title:"Observação Geral",cat:"PNR",desc:"Elemento opcional. Registra observações em texto livre visíveis por todos os escritórios com acesso ao PNR.",syntax:[{label:"Observação geral",code:"RM PSGR CIENTE DEPOSITO HTL",note:""},{label:"Para elementos específicos",code:"RM C,H/PREFERS NON SMOKING",note:"C = carro, H = hotel"}],related:["RC","OP"]},
-  {cmd:"RC",title:"Observação Confidencial",cat:"PNR",desc:"Elemento opcional. Observações visíveis apenas pelo escritório que as criou e por outros especificados (até 3). Demais escritórios verão RESTRICTED no lugar do texto.",syntax:[{label:"Confidencial — só seu escritório",code:"RC CONTA ESPECIAL 4844",note:""},{label:"Compartilhando com outros",code:"RC SAOB22031,SAOB22710/CONTA 4844",note:""}],related:["RM","OP"]},
-  {cmd:"OP",title:"Outros Prazos",cat:"PNR",desc:"Elemento opcional. Agenda o envio do PNR para a fila 3 da agência nas datas especificadas para revisão. Ideal para controle de pendências e follow-up.",syntax:[{label:"Data específica",code:"OP 15SEP/VERIFICAR HOTEL",note:""},{label:"Múltiplas datas (máx 3)",code:"OP 15SEP,30SEP,15OCT/CHK TOUR",note:""},{label:"Fila específica",code:"OP 15SEP/8/CHECAR TKTL",note:"Fila 8"}],related:["RM","RC"]},
-
-  // ─── SSR / OSI ───
-  {cmd:"SR",title:"Serviço Suplementar (SSR)",cat:"SSR/OSI",desc:"Elemento opcional. Solicita serviços especiais às empresas aéreas: refeições, cadeira de rodas, UMNR, Frequent Flyer, identificação de documentos etc. Gera mensagem automática para a cia após final de transação. Pode ser associado a passageiro (/P) e segmento (/S).",syntax:[{label:"Refeição vegetariana pax 1",code:"SR VGML/P1",note:""},{label:"Sem leite pax 2 segmento 4",code:"SR NLML/P2/S4",note:""},{label:"Cadeira de rodas",code:"SR WCHR/S7-9",note:"Nos segmentos 7 a 9"},{label:"UMNR 10 anos",code:"SR UMNR - 10YRS",note:""},{label:"Frequent Flyer",code:"SR FQTV XX HK1-123456789",note:"XX = código da cia"},{label:"Documento de identificação",code:"SR FOID YY HK1-PP12345678",note:"PP = passaporte"}],related:["OS","NM","SS"]},
-  {cmd:"OS",title:"Informação para Empresa Aérea (OSI)",cat:"SSR/OSI",desc:"Elemento opcional. Registra informações adicionais para as cias aéreas reservadas. Diferente do SSR, é apenas informativo e não requer resposta. Pode ser associado a passageiro (/P).",syntax:[{label:"Para cia específica, pax 2",code:"OS LH VIP CBS PRESIDENT/P2",note:""},{label:"Para todas as cias, pax 4",code:"OS YY VIP CBS PRESIDENT/P4",note:""},{label:"Prazo para cia aérea",code:"OS AA TKTL 19SEP/1600",note:"Informa prazo para evitar cancelamento"}],related:["SR","AP"]},
-
-  // ─── FINALIZAR PNR ───
-  {cmd:"ET",title:"Encerrar e Arquivar PNR",cat:"Finalizar PNR",desc:"Finaliza a criação ou modificação do PNR. O Amadeus arquiva o PNR e gera um localizador de registro único (6 caracteres). Todas as solicitações e mensagens para as cias são enviadas após o ET.",syntax:[{label:"Encerrar e arquivar",code:"ET",note:""},{label:"Encerrar e reexibir",code:"ER",note:""},{label:"Encerrar ajustando SSRs",code:"ETK",note:"Ajusta automaticamente códigos de aviso"}],related:["IG","IR","RF"]},
-  {cmd:"ER",title:"Encerrar e Reexibir PNR",cat:"Finalizar PNR",desc:"Finaliza e salva o PNR, reexibindo-o na tela após o encerramento. Útil para conferência imediata após salvar.",syntax:[{label:"Encerrar e reexibir",code:"ER",note:""}],related:["ET","IG"]},
-  {cmd:"IG",title:"Ignorar / Descartar Alterações",cat:"Finalizar PNR",desc:"Descarta todas as modificações feitas desde a última retirada do PNR, revertendo ao estado anterior. Durante criação, anula todos os dados inseridos.",syntax:[{label:"Ignorar e arquivar",code:"IG",note:""},{label:"Ignorar e reexibir",code:"IR",note:""}],related:["ET","ER"]},
-
-  // ─── RETIRAR PNR ───
-  {cmd:"RT",title:"Retirar PNR",cat:"Retirar PNR",desc:"Exibe um PNR ativo pelo localizador, sobrenome, número do bilhete, número do voo/data, ou número Frequent Flyer. PNRs ficam ativos por até 3 dias após o último segmento. Após, ficam no arquivo de data passada por 5 anos.",syntax:[{label:"Pelo localizador",code:"RT AMQ6BB",note:""},{label:"Pelo sobrenome",code:"RT/LAGO",note:"PNRs da sua agência"},{label:"Pelo número do bilhete",code:"RTTKT/042-4324567890",note:""},{label:"Pelo voo e data",code:"RTJJ3822/20OCTGIGBSB-MATTOS",note:""},{label:"Pelo Frequent Flyer",code:"RTM/LH-386427991",note:""}],related:["RH","RL","RTSVC","RTF"]},
-  {cmd:"RH",title:"Histórico do PNR",cat:"Retirar PNR",desc:"Exibe o histórico completo de um PNR, incluindo criação, todas as modificações posteriores e segmentos já voados. Cada final de transação gera um novo registro numerado. O registro de criação é sempre 000.",syntax:[{label:"Histórico completo",code:"RH",note:""},{label:"Histórico de um segmento",code:"RHS3",note:"Segmento 3"},{label:"Histórico de voos",code:"RHA",note:""},{label:"Histórico de nomes",code:"RHN",note:""},{label:"Histórico de SSR e OSI",code:"RHG",note:""}],related:["RT","RL"]},
-  {cmd:"RL",title:"Localizador da Empresa Aérea",cat:"Retirar PNR",desc:"Exibe o localizador de registro da reserva no sistema de cada empresa aérea reservada. Também exibe o histórico de localizadores (RLH).",syntax:[{label:"Localizador da cia",code:"RL",note:""},{label:"Histórico de localizadores",code:"RLH",note:""}],related:["RT","RH"]},
-  {cmd:"RTSVC",title:"Informações Adicionais de Segmentos",cat:"Retirar PNR",desc:"Exibe informações adicionais dos voos reservados fornecidas pelas empresas aéreas, como restrições de tráfego, mensagens informativas e outras informações relevantes.",syntax:[{label:"Todos os segmentos",code:"RTSVC",note:""},{label:"Segmento específico",code:"RTSVC6",note:"Segmento 6"}],related:["RT","SS"]},
-  {cmd:"RTF",title:"Campos de Emissão / Reemissão",cat:"Retirar PNR",desc:"Exibe os campos de emissão e reemissão do PNR: linhas de pagamento (FP), bilhetes emitidos (FA/FH), endosso (FE), comissão (FM) e outros elementos relacionados à emissão.",syntax:[{label:"Ver campos de emissão",code:"RTF",note:""}],related:["RT","TTP","TQT"]},
-  {cmd:"RTA",title:"Visualizar Somente Segmentos",cat:"Retirar PNR",desc:"Exibe apenas os segmentos de voo da reserva, sem os demais elementos do PNR.",syntax:[{label:"Somente segmentos",code:"RTA",note:""}],related:["RT","SS"]},
-
-  // ─── CANCELAR / MODIFICAR ───
-  {cmd:"XE",title:"Cancelar Elemento do PNR",cat:"Cancelar/Modificar",desc:"Cancela elementos específicos do PNR pelo número. Pode cancelar elementos individuais, consecutivos ou não consecutivos. Não pode combinar segmentos (voos/hotel/carro) com outros elementos em uma mesma entrada.",syntax:[{label:"Um elemento",code:"XE8",note:""},{label:"Consecutivos",code:"XE4-6",note:"Elementos 4, 5 e 6"},{label:"Não consecutivos",code:"XE4,6,8",note:""},{label:"Misto",code:"XE4-6,8",note:""}],related:["DL","XI","SX"]},
-  {cmd:"DL",title:"Anular Elemento (Histórico)",cat:"Cancelar/Modificar",desc:"Anula elementos do PNR, transferindo-os da seção ativa para o histórico. Usado especialmente para remover segmentos e SSRs com códigos de aviso UC, UN e NO.",syntax:[{label:"Anular elemento 8",code:"DL8",note:""},{label:"Anular consecutivos",code:"DL4-6",note:""}],related:["XE","XI"]},
-  {cmd:"XI",title:"Cancelar Todo o Itinerário",cat:"Cancelar/Modificar",desc:"Cancela todos os voos, hotéis e carros reservados, todos os SSRs e o prazo TKTL (substituído por TKOK automaticamente).",syntax:[{label:"Cancelar itinerário completo",code:"XI",note:"Todos os segmentos"}],related:["XE","DL"]},
-  {cmd:"SX",title:"Cancelar Assentos por Segmento",cat:"Cancelar/Modificar",desc:"Cancela assentos de segmentos específicos, consecutivos ou não.",syntax:[{label:"Um segmento",code:"SX/S4",note:""},{label:"Consecutivos",code:"SX/S4-6",note:""},{label:"Não consecutivos",code:"SX/S3,5",note:""}],related:["XE","SS"]},
-  {cmd:"SB",title:"Revenda Automática de Voo",cat:"Cancelar/Modificar",desc:"Permite trocar classe e/ou data de um voo de forma simples, desde que haja disponibilidade. SSRs originais podem precisar ser resolicados.",syntax:[{label:"Trocar classe voo 6 para Y",code:"SBY6",note:""},{label:"Trocar data voo 6",code:"SB28NOV6",note:""},{label:"Trocar número do voo 3",code:"SBRG8740*3",note:""},{label:"Classe e data voo 6",code:"SBY28NOV6",note:""}],related:["SS","RS"]},
-  {cmd:"RS",title:"Reordenar Segmentos",cat:"Cancelar/Modificar",desc:"Reordena segmentos dentro do PNR. Aplicável principalmente a segmentos em aberto (OPEN) sem data e ARNK. Para demais segmentos, serve apenas para visualização e é desfeito após o ET.",syntax:[{label:"Um segmento",code:"RS3,5",note:"Após o segmento 3, insere o 5"},{label:"Consecutivos",code:"RS4,7-9",note:""}],related:["SS","SB"]},
-  {cmd:"SP",title:"Dividir PNR",cat:"Cancelar/Modificar",desc:"Divide um PNR em dois ou mais quando passageiros têm itinerários diferentes. Gera um ASSOCIATE PNR e um PARENT PNR, ambos com um registro de referência cruzada (AXR). A divisão automática ocorre quando o total de assentos não corresponde aos nomes.",syntax:[{label:"Separar pax 3",code:"SP 3",note:""},{label:"Separar paxs 1, 2 e 3",code:"SP 1-3",note:"Consecutivos"},{label:"Encerrar ASSOCIATE PNR",code:"EF",note:"Finaliza o PNR gerado pela divisão"}],related:["NM","ET","RRN"]},
-  {cmd:"RRN",title:"Copiar PNR",cat:"Cancelar/Modificar",desc:"Cria uma nova reserva a partir do PNR exibido, copiando itinerário, dados do passageiro, segmentos passivos, carros, hotéis e outros elementos (exceto prazo TK).",syntax:[{label:"Copiar com dados do pax",code:"RRN",note:""},{label:"Copiar com referência cruzada",code:"RRA",note:""},{label:"Copiar só itinerário",code:"RRI",note:""},{label:"Copiar só dados pax",code:"RRP",note:""},{label:"Alterar total de paxs",code:"RRN/3",note:"Copia para 3 passageiros"}],related:["SP","ET"]},
-
-  // ─── TARIFAÇÃO ───
-  {cmd:"FXP",title:"Tarifa e Cria TST (Classes Reservadas)",cat:"Tarifação",desc:"Tarifa o PNR respeitando as classes já reservadas e cria a TST (máscara de tarifação) para emissão. Aceita entradas adicionais para tarifa privada, retroativo, fare basis, cia validadora e outros.",syntax:[{label:"Tarifação simples",code:"FXP",note:""},{label:"Tarifa privada",code:"FXP/R,U",note:""},{label:"Código de acordo",code:"FXP/R,U*ITTOUR",note:""},{label:"Retroativo",code:"FXP/R,03DEC23",note:""},{label:"Fare basis específica",code:"FXP/L-BRAHVTRCE",note:""},{label:"Cia validadora",code:"FXP/R,U,VC-YY",note:""},{label:"Isentar taxa DU",code:"FXP/R,ET-DU",note:""},{label:"Volta ao mundo",code:"FXP/S1RW",note:""},{label:"Brand específica",code:"FXP/FF-XX",note:""}],related:["FXR","FXB","TTP","TQT"]},
-  {cmd:"FXR",title:"Tarifa com Menor Fare e Ajusta Classes",cat:"Tarifação",desc:"Tarifa com a menor tarifa disponível e refaz automaticamente as reservas, ajustando as classes para as corretas. Equivalente ao FXP mas altera os bookings.",syntax:[{label:"Tarifação automática",code:"FXR",note:"Ajusta bookings para classes corretas"}],related:["FXP","FXB","TTP"]},
-  {cmd:"FXB",title:"Tarifa com Menor Classe Disponível",cat:"Tarifação",desc:"Tarifa e cria TST alterando as classes para a menor tarifa disponível, sem refazer automaticamente as reservas.",syntax:[{label:"Menor tarifa disponível",code:"FXB",note:""}],related:["FXP","FXR"]},
-  {cmd:"FXQ",title:"Tarifa para Reemissão",cat:"Tarifação",desc:"Tarifa a reserva para reemissão utilizando os voos e classes selecionados. Gera máscara com a diferença tarifária a ser cobrada.",syntax:[{label:"Recálculo padrão",code:"FXQ",note:""},{label:"Segmento específico",code:"FXQ/S5",note:""},{label:"Brand da cia",code:"FXQ/FF-KM",note:""},{label:"Cia validadora",code:"FXQ/R,U,VC-JJ",note:""}],related:["FXO","FXI","TQR","TQT"]},
-  {cmd:"FXO",title:"Tarifa Reemissão com Menor Disponível",cat:"Tarifação",desc:"Tarifa para reemissão utilizando a menor classe e tarifa disponível com os voos selecionados.",syntax:[{label:"Menor tarifa disponível",code:"FXO",note:""}],related:["FXQ","FXI"]},
-  {cmd:"FXI",title:"Gerar Máscara Reemissão NO ADC",cat:"Tarifação",desc:"Cria máscara de reemissão sem valores a cobrar (NO ADC / involuntária). Responsabilidade total do agente. Aceita entradas complementares para Schedule Change e número de bilhete.",syntax:[{label:"Máscara NO ADC",code:"FXI",note:""},{label:"Schedule Change",code:"FXI/SC",note:"Verifique quais cias exigem"},{label:"Com número de bilhete",code:"FXI/TKT123-4004200300/P3",note:""}],related:["FXQ","TQT","RTF"]},
-  {cmd:"FQDGRULIS",title:"Consultar Regras de Tarifa",cat:"Tarifação",desc:"Verifica as regras completas de uma fare basis para determinado trecho, data de voo, cia e data de emissão.",syntax:[{label:"Consulta regras",code:"FQDGRULIS/D20AUG/ATP/CO/R,18JUL24",note:"Trecho GRU-LIS, voo 20AGO, CO, emissão 18JUL"},{label:"Seção penalidades",code:"FQN8*PE",note:"Penalidades da fare basis 8"}],related:["FXP","TTP"]},
-  {cmd:"TGBD",title:"Lista BSP",cat:"Tarifação",desc:"Exibe a lista de companhias aéreas BSP de um determinado país, aptas para emissão.",syntax:[{label:"BSP Brasil",code:"TGBD-BR",note:""}],related:["TTP","FXP"]},
-
-  // ─── EMISSÃO ───
-  {cmd:"TTP",title:"Emitir Bilhete",cat:"Emissão",desc:"Emite o bilhete eletrônico com base na TST criada. Combinações com /T, /RT, /TTM, /ITR-EML permitem emitir EMDs junto e enviar por e-mail.",syntax:[{label:"Emitir e manter PNR",code:"TTP/RT",note:""},{label:"Emitir com e-mail",code:"TTP/RT/ITR-EML-EMAIL@EMAIL.COM",note:""},{label:"Emitir TST 1 e voltar",code:"TTP/T1/RT",note:""},{label:"Emitir TST 1 + EMD 2",code:"TTP/T1/TTM/M2/RT",note:""}],related:["FXP","TRDC","TQT","TTM"]},
-  {cmd:"TRDC",title:"Anular Bilhete (VOID)",cat:"Emissão",desc:"Anula um bilhete eletrônico emitido (VOID). Pode ser feito pela linha FA do PNR ou pelo número do bilhete. Verifique se a cia permite cancelamento antes de usar.",syntax:[{label:"Pela linha FA",code:"TRDC/L0",note:"L0 = linha do bilhete no PNR"},{label:"Pelo número do bilhete",code:"TRDC/TK-3003100200",note:"Sem dígitos IATA"}],related:["TTP","FXI"]},
-  {cmd:"TTC",title:"Criar Base da TST (Manual)",cat:"Emissão",desc:"Cria a base da TST com os segmentos da reserva para emissão manual. Após TTC, use TTK/TTI para inserir os valores, fare basis, validades e bagagem.",syntax:[{label:"Criar TST manual",code:"TTC",note:""}],related:["TTK","TTI","TTP"]},
-  {cmd:"TTK",title:"Editar TST — Múltiplas Informações",cat:"Emissão",desc:"Edita múltiplas informações da TST de uma vez: tarifa, equivalente, taxas, total. Ideal para inserir todos os valores da máscara em uma única entrada.",syntax:[{label:"Valor da tarifa",code:"TTK/FUSD1000.00",note:""},{label:"Equivalente",code:"TTK/EBRL6000.00",note:""},{label:"Taxa",code:"TTK/XBRL432.00BR",note:""},{label:"Total",code:"TTK/TBRL6432.00",note:""},{label:"Reemissão — valores original e novo",code:"TTK/X2/OBRL93.58YR/XBRL91.52YR",note:"O = original, X = novo"}],related:["TTI","TTC","TTP"]},
-  {cmd:"TTI",title:"Editar TST — Uma Informação",cat:"Emissão",desc:"Edita uma informação por vez na TST: fare basis, validades, bagagem, construção tarifária. Aceita inserção linear com todas as entradas separadas por /.",syntax:[{label:"Fare basis — todos os segmentos",code:"TTI/BXX",note:""},{label:"Fare basis — segmento específico",code:"TTI/LX/BXX",note:"X = número do segmento"},{label:"Validade",code:"TTI/V10MAR10MAR",note:"NVB + NVA"},{label:"Bagagem",code:"TTI/AXPC",note:""},{label:"Construção tarifária",code:"TTI/CBUILD",note:""},{label:"Tudo de uma vez",code:"TTI/FUSD1321.00/EBRL8009.75/XBRL58.32BR/TBRL8403.04",note:""}],related:["TTK","TTC","TTP"]},
-  {cmd:"TWD",title:"Abertura de Bilhete",cat:"Emissão",desc:"Abre um bilhete eletrônico para reemissão. Pode ser feito pela linha FA/FHE do PNR ou pelo número do bilhete.",syntax:[{label:"Pela linha FA",code:"TWD/L12",note:"Linha 12 do PNR"},{label:"Pelo número do bilhete",code:"TWD/TKT123-3003400500",note:""}],related:["TQR","FXQ","TTP"]},
-  {cmd:"TQT",title:"Verificar Máscaras TST/TQR",cat:"Emissão",desc:"Visualiza as máscaras de emissão e reemissão gravadas na reserva. TQR mostra apenas as de reemissão.",syntax:[{label:"Todas as máscaras",code:"TQT",note:""},{label:"Máscara 1",code:"TQT/T1",note:""},{label:"Reemissão — todas",code:"TQR",note:""},{label:"Reemissão — máscara 1",code:"TQR/T1",note:""}],related:["TTP","FXP","FXQ"]},
-
-  // ─── EMD ───
-  {cmd:"TTM",title:"Emitir EMD",cat:"EMD",desc:"Emite um EMD (Electronic Miscellaneous Document) a partir de uma máscara TMQ gerada. Pode ser combinado com TTP para emitir bilhete e EMD juntos.",syntax:[{label:"Emitir EMD 4",code:"TTM/M4/RT",note:""},{label:"Bilhete + EMD",code:"TTP/T5/TTM/M4/RT",note:""}],related:["TQM","TMI","TMC"]},
-  {cmd:"TQM",title:"Verificar Máscaras EMD",cat:"EMD",desc:"Abre e visualiza as máscaras de EMD salvas no localizador.",syntax:[{label:"Ver máscaras EMD",code:"TQM",note:""}],related:["TTM","TMI","TMX"]},
-  {cmd:"TMI",title:"Inserir Pagamento no EMD",cat:"EMD",desc:"Insere informações adicionais na máscara de EMD: forma de pagamento, valor, se é doméstico ou internacional.",syntax:[{label:"Pagamento faturado",code:"TMI/M1/FP-CASH",note:""},{label:"Cartão à vista",code:"TMI/M2/FP-CCVI112233.../2233",note:""},{label:"Reemissão",code:"TMI/M2/FP-O/CASH",note:"O/ = forma original"},{label:"Internacional",code:"TMI/YI/M2",note:"I = internacional"},{label:"Valor da penalidade",code:"TMI/M2/F1142.20/CV-1142.20",note:""}],related:["TQM","TTM","TMC"]},
-  {cmd:"TMC",title:"Gerar Máscara EMD",cat:"EMD",desc:"Gera a máscara de EMD a partir de uma linha SVC criada. Informar cia validadora e número da linha SVC.",syntax:[{label:"Gerar máscara",code:"TMC/VAV/L4",note:"Cia validadora VAV, linha SVC 4"},{label:"Para CNN",code:"TMC/VAV/L6/CNN",note:""}],related:["TQM","TMI","TTM"]},
-  {cmd:"TMX",title:"Excluir Máscara EMD",cat:"EMD",desc:"Exclui máscaras EMD específicas ou todas de uma vez.",syntax:[{label:"Excluir máscara 1",code:"TMX/M1",note:""},{label:"Excluir todas",code:"TMX/ALL",note:""}],related:["TQM","TMI"]},
-  {cmd:"EWD",title:"Abrir EMD Emitido",cat:"EMD",desc:"Abre uma máscara de EMD já emitida para consulta.",syntax:[{label:"Abrir pela linha",code:"EWD/L2",note:"Linha 2 do PNR"}],related:["TQM","TTM"]},
-  {cmd:"SM",title:"Mapa de Assentos",cat:"EMD",desc:"Exibe o mapa de assentos de um segmento específico.",syntax:[{label:"Mapa do segmento 2",code:"SM2",note:""}],related:["FXG","FXK"]},
-  {cmd:"FXG",title:"Tarifa de Assento",cat:"EMD",desc:"Tarifa o assento selecionado no mapa.",syntax:[{label:"Tarifa assento",code:"FXG",note:""},{label:"Cia específica",code:"FXG/VC-JJ",note:""}],related:["SM","FXK","TTM"]},
-  {cmd:"FXK",title:"Catálogo de Serviços",cat:"EMD",desc:"Abre o catálogo de serviços disponíveis pela cia validadora.",syntax:[{label:"Ver catálogo",code:"FXK",note:""},{label:"Selecionar serviço",code:"FWK1",note:"Tarifa o serviço 1 do catálogo"}],related:["SM","FXG","TTM"]},
-
-  // ─── FH / BILHETE MANUAL ───
-  {cmd:"FH",title:"Incluir Número de Bilhete",cat:"Emissão",desc:"Insere manualmente o número do bilhete eletrônico no PNR. Usado quando a cia informa TKT NBR TRANSMISSION = YES. Deve ser associado ao passageiro (/P) em PNRs com múltiplos paxs.",syntax:[{label:"Bilhete eletrônico pax 2",code:"FHE 042-4976123450//BY ANA.AGT/P2",note:""},{label:"Bilhete para segmento",code:"FHE 042-49761234596//BY JO.AGT/S3",note:""},{label:"Bilhete para INF",code:"FHA INF 001-3258765433 //BY ANA.AGT",note:""}],related:["TK","OS","TKOK"]},
-
-  // ─── HISTÓRICO ───
-  {cmd:"REP",title:"PNR de Data Passada",cat:"Histórico",desc:"Solicita a exibição de PNRs purgados antes de 31/01/2005. A resposta é enviada para a fila 96 em até 7 dias.",syntax:[{label:"Pelo voo e sobrenome",code:"REP/AF702/23SEP06-SILVA",note:""},{label:"Com localizador",code:"REP/AF702/23SEP06-SILVA*AHH3DL",note:""}],related:["RPP","RT"]},
-  {cmd:"RPP",title:"PNR Recall — On Line",cat:"Histórico",desc:"Exibe PNRs purgados após 31/01/2005 de forma imediata. Permite busca por voo/data, localizador, bilhete, Frequent Flyer e outros.",syntax:[{label:"Pelo voo e data",code:"RPP/AF7708/15NOV06",note:""},{label:"Pelo bilhete",code:"RPP/TKT-0421645553968",note:""},{label:"Pelo localizador",code:"RPP/RLC-2RI6UG/25NOV06T",note:""}],related:["REP","RPD","RT"]},
-  {cmd:"RO",title:"PNR CLAIM",cat:"Histórico",desc:"Copia para o Amadeus um PNR criado no sistema de reservas de uma cia aérea. A cia deve ter autorizado o PNR CLAIM (verificar em GGPCAXX). Após a cópia, o controle passa para a agência.",syntax:[{label:"Pelo localizador da cia",code:"RO AATIBZUE",note:"Empresa AA, localizador TIBZUE"},{label:"Pelo voo/data/sobrenome",code:"RO AA904/20OCT-SOUZA",note:""}],related:["RT","ET","IG"]},
-
-  // ─── SEGURIDADE ───
-  {cmd:"RP",title:"Transferência de PNR",cat:"Seguridade",desc:"Transfere a responsabilidade do PNR para outro escritório, incluindo processamento de filas, prazos e demais elementos.",syntax:[{label:"Transferir PNR",code:"RPS/RIOB22163/ALL",note:""},{label:"Todos os AXR",code:"RP/RIOB22163/ALL",note:""}],related:["ES","RT"]},
-  {cmd:"ES",title:"Seguridade Individual de PNR",cat:"Seguridade",desc:"Libera ou restringe o acesso de escritórios específicos a um PNR. R = apenas visualização, B = visualização e modificação, N = restrição.",syntax:[{label:"Liberar visualização",code:"ES SAOB22901-R",note:""},{label:"Liberar modificação",code:"ES RIOB22901-B",note:""},{label:"Restringir acesso",code:"ES BHZB22901-N",note:""},{label:"Cancelar seguridade",code:"ESX",note:""},{label:"Exibir seguridade",code:"ESD",note:""}],related:["RP","RT"]},
-
-  // ─── HELP / INFO ───
-  {cmd:"GGAIR",title:"Informações Gerais da Cia Aérea",cat:"Ajuda/Info",desc:"Exibe a página de informações gerais de uma companhia aérea: políticas de emissão, penalidades, bagagem, UMNR, Frequent Flyer etc.",syntax:[{label:"Informações gerais",code:"GGAIRXX",note:"XX = código IATA da cia"},{label:"Políticas de segmentos passivos",code:"GGPCAXX",note:""}],related:["TGBD","HE"]},
-  {cmd:"HE",title:"Ajuda do Sistema",cat:"Ajuda/Info",desc:"Exibe a ajuda do sistema Amadeus para qualquer comando ou tópico.",syntax:[{label:"Ajuda de emissão",code:"HE ETT XX",note:"XX = código da cia"},{label:"Códigos de PNR",code:"HE PNR CODES",note:""},{label:"Todos os SSRs",code:"HE SR",note:""}],related:["GGAIR"]},
-
-  // ─── LM ───
-  {cmd:"LM",title:"Listar PNRs de um Voo",cat:"Retirar PNR",desc:"Exibe a lista de PNRs reservados pela sua agência para um voo e data específicos.",syntax:[{label:"Por voo e data",code:"LM/UA830/20AUG",note:""},{label:"Com par de cidades",code:"LM/JL047/13DEC/GRUNRT",note:""},{label:"Com SSR específico",code:"LM/S*VGML/RG2163/30MAY",note:""}],related:["RT","SS"]},
-
-  // ─── AN (DISPONIBILIDADE) ───
-  {cmd:"AN",title:"Disponibilidade de Voos",cat:"Disponibilidade",desc:"Exibe a disponibilidade de voos para uma data, origem e destino. Pode filtrar por companhia aérea. Usado como base para venda com entrada curta (SS).",syntax:[{label:"Disponibilidade padrão",code:"AN10MARGRUMXP/AAZ",note:"Data, rota, classe, cia"},{label:"Com cia específica",code:"AN15DECGRULAX/ALA",note:""}],related:["SS","SB"]},
-];
-
-// ══════════════════════════════════════
-// INDEX DE BUSCA GLOBAL (todos os sistemas)
-// ══════════════════════════════════════
-var globalSearchIdx = [];
 function buildGlobalIdx(){
   document.querySelectorAll('.module-panel').forEach(function(panel){
     var id = panel.id;
@@ -2894,6 +2810,7 @@ document.addEventListener('keydown',function(e){
 });
 
 // ── FUZZY SEARCH HELPERS ──
+var globalSearchIdx = [];
 function normalizeStr(s){
   return s.toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g,'')
@@ -2919,9 +2836,12 @@ function doSearch(q){
   var terms = norm.split(' ').filter(function(t){return t.length>0;});
   var scored = [];
   globalSearchIdx.forEach(function(item){
+    var normCmd = normalizeStr(item.cmd);
     var hay = normalizeStr(item.cmd+' '+item.desc+' '+item.mod+' '+item.sys);
     var totalScore = 0;
     var allMatch = terms.every(function(t){
+      // Para termos curtos (<=5 chars): também aceita startsWith no comando
+      if(t.length <= 5 && normCmd.startsWith(t)){ totalScore += 80; return true; }
       var s = fuzzyScore(hay, t);
       totalScore += s;
       return s > 0;
@@ -3023,22 +2943,30 @@ function searchCmd(q){
   // Busca exata primeiro
   var exact = AMADEUS_CMDS.find(function(c){return c.cmd===qu;});
   if(exact){showCmd(exact.cmd);return;}
-  // Busca parcial
+  // Busca parcial pelo código
   var partial = AMADEUS_CMDS.find(function(c){return c.cmd.startsWith(qu);});
   if(partial){showCmd(partial.cmd);return;}
-  // Busca por título/descrição
-  var terms = q.toLowerCase().split(' ');
-  var byDesc = AMADEUS_CMDS.find(function(c){
-    var hay = (c.cmd+' '+c.title+' '+c.desc).toLowerCase();
-    return terms.every(function(t){return hay.indexOf(t)!==-1;});
+  // Busca fuzzy por título/descrição/categoria
+  var norm = normalizeStr(q);
+  var terms = norm.split(' ').filter(function(t){return t.length>0;});
+  var scored = [];
+  AMADEUS_CMDS.forEach(function(c){
+    var normCmd = normalizeStr(c.cmd);
+    var hay = normalizeStr(c.cmd+' '+c.title+' '+c.desc+' '+c.cat);
+    var total = 0;
+    var allMatch = terms.every(function(t){
+      if(t.length <= 5 && normCmd.startsWith(t)){ total += 80; return true; }
+      var s = fuzzyScore(hay, t);
+      total += s;
+      return s > 0;
+    });
+    if(allMatch) scored.push({cmd:c.cmd, score:total});
   });
-  if(byDesc){showCmd(byDesc.cmd);return;}
+  scored.sort(function(a,b){return b.score-a.score;});
+  if(scored.length){ showCmd(scored[0].cmd); return; }
   box.classList.remove('show');
 }
 
-// ══════════════════════════════════════
-// NAVEGAÇÃO
-// ══════════════════════════════════════
 function showSystem(s){
   document.getElementById('landing').style.display = 'none';
   document.querySelectorAll('.system-view').forEach(function(v){v.classList.remove('active');});
@@ -3437,19 +3365,25 @@ function calcS4(){
 
 function filterCias(grid, val){
   var cards = document.querySelectorAll('#cia-grid-'+grid+' .cia-card');
-  var q = val.toLowerCase().trim();
+  var norm = normalizeStr(val);
+  var terms = norm.split(' ').filter(function(t){return t.length>0;});
   cards.forEach(function(c){
-    var text = (c.getAttribute('data-cia')||'').toLowerCase() + ' ' + c.innerText.toLowerCase();
-    c.classList.toggle('hidden', q.length > 0 && text.indexOf(q) === -1);
+    if(!terms.length){ c.classList.remove('hidden'); return; }
+    var text = normalizeStr((c.getAttribute('data-cia')||'')+' '+c.innerText);
+    var match = terms.every(function(t){ return fuzzyScore(text, t) > 0; });
+    c.classList.toggle('hidden', !match);
   });
 }
 
 function filterAirlines(val){
   var cards = document.querySelectorAll('#airlineGrid .airline-card');
-  var q = val.toLowerCase().trim();
+  var norm = normalizeStr(val);
+  var terms = norm.split(' ').filter(function(t){return t.length>0;});
   cards.forEach(function(c){
-    var text = (c.getAttribute('data-cia')||'').toLowerCase() + ' ' + c.innerText.toLowerCase();
-    c.classList.toggle('hidden', q.length > 0 && text.indexOf(q) === -1);
+    if(!terms.length){ c.classList.remove('hidden'); return; }
+    var text = normalizeStr((c.getAttribute('data-cia')||'')+' '+c.innerText);
+    var match = terms.every(function(t){ return fuzzyScore(text, t) > 0; });
+    c.classList.toggle('hidden', !match);
   });
 }
 
@@ -6191,14 +6125,12 @@ function buscarErro() {
   }
   if (inicial) inicial.style.display = 'none';
 
+  var normQ = normalizeStr(q);
+  var terms = normQ.split(' ').filter(function(t){return t.length>0;});
   var filtrados = ERROS_GDS.filter(function(e) {
     var matchSistema = !sistema || e.sistema === sistema;
-    var matchTexto = (
-      e.codigo.toLowerCase().includes(q) ||
-      e.descricao_pt.toLowerCase().includes(q) ||
-      e.descricao_en.toLowerCase().includes(q) ||
-      e.solucao.toLowerCase().includes(q)
-    );
+    var hay = normalizeStr(e.codigo+' '+e.descricao_pt+' '+e.descricao_en+' '+e.solucao+(e.comando||''));
+    var matchTexto = terms.every(function(t){ return fuzzyScore(hay, t) > 0; });
     return matchSistema && matchTexto;
   });
 
