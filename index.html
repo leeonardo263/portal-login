@@ -445,6 +445,105 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
 .brand-select { background:rgba(155,127,255,.1); border:1.5px solid rgba(155,127,255,.3); border-radius:8px; padding:7px 12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:#F0EEE8; outline:none; cursor:pointer; transition:border-color .2s; }
 .brand-select:focus { border-color:#9B7FFF; }
 .brand-select option { background:#1C2138; color:#F0EEE8; }
+
+/* ══════════════════════════════════════
+   MOBILE RESPONSIVE — PWA
+══════════════════════════════════════ */
+@media(max-width:768px){
+  /* Header */
+  header { padding:0 1rem; height:56px; }
+  .logo-text { display:none; }
+  .header-tag { display:none; }
+  .search-btn span { display:none; }
+
+  /* Landing */
+  #landing { padding:2rem 1rem; }
+  .landing-title { font-size:clamp(1.8rem,7vw,2.4rem); letter-spacing:-1px; }
+  .landing-sub { font-size:14px; margin-bottom:32px; }
+  .system-cards { grid-template-columns:1fr 1fr; gap:12px; max-width:100%; }
+  .system-card { padding:20px 16px; border-radius:14px; }
+  .system-logo-wrap { width:52px; height:52px; font-size:18px; margin-bottom:14px; }
+  .system-name { font-size:1.1rem; }
+  .system-desc { display:none; }
+
+  /* Hero */
+  .hero { padding:32px 1rem 28px; grid-template-columns:1fr; gap:0; }
+  .module-count { display:none; }
+  .hero h1 { font-size:clamp(1.6rem,6vw,2.2rem); }
+  .hero-sub { font-size:13px; }
+
+  /* Tabs */
+  .nav-tabs { padding:0 1rem; }
+  .tab-btn { padding:12px 12px; font-size:12px; }
+  .tab-num { display:none; }
+
+  /* Content */
+  .content { padding:1.5rem 1rem 3rem; }
+  .section-grid { grid-template-columns:1fr; }
+  .payment-grid { grid-template-columns:1fr; }
+
+  /* Cards */
+  .card-head h3 { font-size:12px; }
+  .cmd-badge { font-size:11px; padding:3px 8px; }
+  .cmd-desc { font-size:12px; }
+
+  /* Calculator */
+  .calc-grid-3 { grid-template-columns:1fr 1fr; gap:10px; }
+  .calc-results { grid-template-columns:1fr 1fr; }
+  .calc-cmd-line { font-size:10px; word-break:break-all; }
+  .cia-selector-row { flex-direction:column; }
+  .cia-select { min-width:100%; }
+  .brand-selector-wrap { flex-wrap:wrap; }
+  .auth-field-wrap { flex-wrap:wrap; gap:8px; }
+  .auth-field-wrap input { width:100%; }
+
+  /* Reacomodação */
+  .cia-grid { grid-template-columns:1fr; }
+  .flow-branch { flex-direction:column; }
+
+  /* Pronta Referência */
+  .airline-grid { grid-template-columns:1fr; }
+  .parc-table { font-size:11px; }
+  .parc-table th, .parc-table td { padding:4px 6px; }
+
+  /* Search overlay */
+  .header-center { width:96vw; left:2vw; transform:none; top:6px; }
+
+  /* AI Chat */
+  #ai-view { padding:1rem; }
+
+  /* Steps */
+  .steps-card .steps-body { padding:14px 14px; }
+  .step-content code { font-size:10px; }
+
+  /* Calc section */
+  .calc-section { padding:16px; }
+  .calc-section-title { font-size:13px; }
+  .calc-field label { font-size:10px; }
+  .calc-input-blue { font-size:13px; padding:8px 10px; }
+  .calc-result-value { font-size:15px; }
+
+  /* Module header */
+  .module-header { flex-direction:column; gap:12px; padding:20px; }
+  .module-meta h2 { font-size:1.2rem; }
+
+  /* Erros GDS */
+  #erros-view { padding:1rem; }
+
+  /* CIA selector sticky */
+  .cia-selector-wrap { top:56px; }
+
+  /* PWA install btn */
+  #installPwaBtn { padding:5px 10px; font-size:11px; }
+}
+
+@media(max-width:400px){
+  .system-cards { grid-template-columns:1fr; }
+  .calc-grid-3 { grid-template-columns:1fr; }
+  .calc-results { grid-template-columns:1fr; }
+  .kpi-grid { grid-template-columns:1fr 1fr; }
+  .hero h1 { font-size:1.5rem; }
+}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -477,7 +576,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
   <div class="header-center" id="searchContainer" style="display:none">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" class="search-input" placeholder="Buscar comandos, módulos..." oninput="doSearch(this.value)" autocomplete="off">
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar comandos, módulos... (/ para abrir)" oninput="doSearch(this.value)" autocomplete="off">
       <span class="search-esc" onclick="toggleSearch()">ESC</span>
     </div>
     <div class="search-results" id="searchResults"></div>
@@ -2780,17 +2879,57 @@ function toggleSearch(){
     setTimeout(function(){document.getElementById('searchInput').focus();},50);
   }
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){var c=document.getElementById('searchContainer');if(c.style.display!=='none')toggleSearch();}});
+document.addEventListener('keydown',function(e){
+  // Escape closes search
+  if(e.key==='Escape'){
+    var c=document.getElementById('searchContainer');
+    if(c.style.display!=='none') toggleSearch();
+  }
+  // '/' opens search (when not typing in an input)
+  if(e.key==='/' && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA' && document.activeElement.tagName!=='SELECT'){
+    e.preventDefault();
+    var c=document.getElementById('searchContainer');
+    if(c.style.display==='none') toggleSearch();
+  }
+});
 
+// ── FUZZY SEARCH HELPERS ──
+function normalizeStr(s){
+  return s.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9 ]/g,' ');
+}
+function fuzzyScore(hay, needle){
+  // Returns score 0-100: exact match=100, fuzzy=lower
+  if(hay.indexOf(needle) !== -1) return 100;
+  // Check all chars of needle appear in order in hay
+  var hi=0, ni=0, score=0;
+  while(hi < hay.length && ni < needle.length){
+    if(hay[hi] === needle[ni]){ score++; ni++; }
+    hi++;
+  }
+  if(ni < needle.length) return 0; // not all chars found
+  return Math.round((score / needle.length) * 70);
+}
 function doSearch(q){
   var box = document.getElementById('searchResults');
   if(!q.trim()){box.innerHTML='';return;}
   if(!globalSearchIdx.length) buildGlobalIdx();
-  var terms = q.toLowerCase().split(' ').filter(function(t){return t.length>0;});
-  var res = globalSearchIdx.filter(function(item){
-    var hay = (item.cmd+' '+item.desc+' '+item.mod+' '+item.sys).toLowerCase();
-    return terms.every(function(t){return hay.indexOf(t)!==-1;});
-  }).slice(0,12);
+  var norm = normalizeStr(q);
+  var terms = norm.split(' ').filter(function(t){return t.length>0;});
+  var scored = [];
+  globalSearchIdx.forEach(function(item){
+    var hay = normalizeStr(item.cmd+' '+item.desc+' '+item.mod+' '+item.sys);
+    var totalScore = 0;
+    var allMatch = terms.every(function(t){
+      var s = fuzzyScore(hay, t);
+      totalScore += s;
+      return s > 0;
+    });
+    if(allMatch) scored.push({item:item, score:totalScore});
+  });
+  scored.sort(function(a,b){return b.score-a.score;});
+  var res = scored.slice(0,12).map(function(s){return s.item;});
   var cols = {AMADEUS:'#4AABFF',GALILEO:'#3DD68C',SABRE:'#F5821F'};
   if(!res.length){box.innerHTML='<div class="no-results">Nenhum resultado encontrado.</div>';return;}
   box.innerHTML = res.map(function(r){
