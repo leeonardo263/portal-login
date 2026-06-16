@@ -3462,7 +3462,7 @@ function filterCias(grid, val){
   cards.forEach(function(c){
     if(!terms.length){ c.classList.remove('hidden'); return; }
     var text = normalizeStr((c.getAttribute('data-cia')||'')+' '+c.innerText);
-    var match = terms.every(function(t){ return fuzzyScore(text, t) > 0; });
+    var match = terms.every(function(t){ return text.indexOf(t) !== -1; });
     c.classList.toggle('hidden', !match);
   });
 }
@@ -3474,7 +3474,7 @@ function filterAirlines(val){
   cards.forEach(function(c){
     if(!terms.length){ c.classList.remove('hidden'); return; }
     var text = normalizeStr((c.getAttribute('data-cia')||'')+' '+c.innerText);
-    var match = terms.every(function(t){ return fuzzyScore(text, t) > 0; });
+    var match = terms.every(function(t){ return text.indexOf(t) !== -1; });
     c.classList.toggle('hidden', !match);
   });
 }
