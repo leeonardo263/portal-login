@@ -648,6 +648,89 @@
       .email-card { grid-template-columns: auto 1fr; }
       .card-meta { display: none; }
     }
+
+    /* ── NAV TABS ── */
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 0 28px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-tab {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active { color: var(--accent2); border-bottom-color: var(--accent); }
+
+    /* ── DASHBOARD ── */
+    .dash-main { padding: 24px 28px; max-width: 1200px; }
+    .dash-toolbar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .dash-select {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 7px 12px; font-size: 13px; outline: none;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px 18px;
+    }
+    .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .dash-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 800px) { .dash-panels { grid-template-columns: 1fr; } }
+
+    .dash-panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+    .dash-panel h3 { font-size: 13px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .bar-label {
+      font-size: 12px; color: var(--text-muted); width: 130px; flex-shrink: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .bar-track { flex: 1; height: 10px; background: var(--surface2); border-radius: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 6px; transition: width 0.3s; }
+    .bar-count { font-size: 12px; font-weight: 700; width: 32px; text-align: right; flex-shrink: 0; }
+
+    .dash-table-wrap { overflow-x: auto; }
+    .dash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .dash-table th {
+      text-align: left; padding: 10px 12px; color: var(--text-muted); font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .dash-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+    .dash-table tr:hover td { background: var(--surface2); }
+    .dash-cat-pill {
+      font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px;
+      background: rgba(59,110,246,0.15); color: var(--accent2); white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -679,6 +762,13 @@
   </div>
 </div>
 
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="nav-tab active" id="navInbox">📥 Caixa de Entrada</button>
+  <button class="nav-tab" id="navDashboard">📊 Dashboard de Encaminhamentos</button>
+</div>
+
+<div id="inboxView">
 <!-- TOOLBAR -->
 <div class="toolbar" id="toolbar" style="display:none;">
   <span class="toolbar-label">Filtrar:</span>
@@ -750,6 +840,76 @@
     <p>Faça login com sua conta Microsoft para carregar e catalogar os emails em aberto.</p>
   </div>
   <div id="emailsGrid" class="emails-grid" style="display:none;"></div>
+</div>
+</div> <!-- /inboxView -->
+
+<!-- DASHBOARD VIEW -->
+<div id="dashboardView" style="display:none;">
+  <div class="dash-main">
+    <div class="dash-toolbar">
+      <select class="dash-select" id="dashFilterAgent">
+        <option value="todos">Todos os agentes</option>
+      </select>
+      <select class="dash-select" id="dashFilterPeriodo">
+        <option value="hoje">Hoje</option>
+        <option value="7d">Últimos 7 dias</option>
+        <option value="30d" selected>Últimos 30 dias</option>
+        <option value="todos">Todo o período</option>
+      </select>
+      <input type="text" id="dashSearch" placeholder="🔍 Buscar por assunto, remetente ou agente…"
+        style="background:var(--surface2);border:1px solid var(--border);color:var(--text);
+               border-radius:8px;padding:7px 14px;font-size:13px;width:280px;outline:none;">
+      <div class="spacer"></div>
+      <button id="btnDashRefresh" class="btn-outline" style="padding:7px 14px;">↻ Atualizar</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiTotal">0</div>
+        <div class="kpi-label">Total encaminhados</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiHoje">0</div>
+        <div class="kpi-label">Encaminhados hoje</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiTopAgente" style="font-size:18px;">—</div>
+        <div class="kpi-label">Agente mais ativo</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiTopCategoria" style="font-size:18px;">—</div>
+        <div class="kpi-label">Classificação mais comum</div>
+      </div>
+    </div>
+
+    <div class="dash-panels">
+      <div class="dash-panel" style="margin-bottom:0;">
+        <h3>Por classificação</h3>
+        <div id="dashChartCategoria"></div>
+      </div>
+      <div class="dash-panel" style="margin-bottom:0;">
+        <h3>Por agente</h3>
+        <div id="dashChartAgente"></div>
+      </div>
+    </div>
+
+    <div class="dash-panel">
+      <h3>Histórico de encaminhamentos</h3>
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Agente</th><th>Assunto</th><th>Remetente</th>
+              <th>Classificação</th><th>Prioridade</th><th>Encaminhado em</th>
+            </tr>
+          </thead>
+          <tbody id="dashTableBody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">Clique em "Dashboard" para carregar os dados.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -827,10 +987,16 @@ const TENANT_ID    = 'consumers'; // contas pessoais @outlook.com / @hotmail.com
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const SCOPES       = ['openid','profile','email','Mail.Read','Mail.Read.Shared','Mail.Send'];
 
+// ── SUPABASE (registro de encaminhamentos p/ dashboard) ──────────
+const SUPABASE_URL = 'https://dgcswgwtylygpyqkpiol.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_tNIley1QBeGasd8C6jYMmA_a8Rb0HbA';
+
 // ── ESTADO ──────────────────────────────────────────────────────
 let accessToken  = null;
 let allEmails    = [];
 let activeFilter = 'todos';
+let currentAgent = { name: '', email: '' };
+let dashData     = [];
 
 // ── AUTH (redirect flow — funciona em mobile e desktop) ──────────
 function buildAuthUrl() {
@@ -891,6 +1057,7 @@ async function onLoggedIn(token) {
     document.getElementById('userName').textContent = name;
     document.getElementById('userEmail').textContent = me.mail || me.userPrincipalName || '';
     document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+    currentAgent = { name, email: me.mail || me.userPrincipalName || '' };
   } catch(e) {}
 
   await loadEmails();
@@ -1407,6 +1574,7 @@ document.getElementById('btnSendReply').addEventListener('click', async () => {
 
     if (res.ok || res.status === 202) {
       showToast('✅ Resposta enviada com sucesso!');
+      registrarEncaminhamento(currentEmailForReply);
       document.getElementById('replyArea').classList.remove('open');
       document.getElementById('btnReply').style.display = 'flex';
       document.getElementById('replyText').value = '';
@@ -1546,6 +1714,165 @@ document.getElementById('btnMarkUnread').addEventListener('click', async () => {
     showToast('Erro ao marcar como não lido');
   }
 });
+
+// ── REGISTRO DE ENCAMINHAMENTO (p/ dashboard) ────────────────────
+async function registrarEncaminhamento(email) {
+  if (!email) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/email_encaminhamentos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        agente_nome:     currentAgent.name  || 'Desconhecido',
+        agente_email:    currentAgent.email || '',
+        email_assunto:   email.subject      || '',
+        email_remetente: email.fromAddr || email.from || '',
+        classificacao:   email.category || 'Não definida',
+        prioridade:      email.priority || 'normal'
+      })
+    });
+  } catch(e) {
+    console.error('Erro ao registrar encaminhamento no dashboard:', e);
+  }
+}
+
+// ── NAVEGAÇÃO ENTRE ABAS ──────────────────────────────────────────
+document.getElementById('navInbox').addEventListener('click', () => {
+  document.getElementById('navInbox').classList.add('active');
+  document.getElementById('navDashboard').classList.remove('active');
+  document.getElementById('inboxView').style.display = '';
+  document.getElementById('dashboardView').style.display = 'none';
+});
+
+document.getElementById('navDashboard').addEventListener('click', () => {
+  document.getElementById('navDashboard').classList.add('active');
+  document.getElementById('navInbox').classList.remove('active');
+  document.getElementById('inboxView').style.display = 'none';
+  document.getElementById('dashboardView').style.display = 'block';
+  loadDashboardData();
+});
+
+// ── CARREGAR DADOS DO DASHBOARD ───────────────────────────────────
+async function loadDashboardData() {
+  const tbody = document.getElementById('dashTableBody');
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">Carregando…</td></tr>`;
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/email_encaminhamentos?select=*&order=encaminhado_em.desc&limit=1000`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) throw new Error('Não foi possível carregar a tabela. Verifique se o script SQL foi executado no Supabase.');
+    dashData = await res.json();
+    populateAgentFilter(dashData);
+    renderDashboard();
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--urgent);padding:24px;">⚠️ ${esc(e.message)}</td></tr>`;
+  }
+}
+
+function populateAgentFilter(data) {
+  const sel = document.getElementById('dashFilterAgent');
+  const current = sel.value;
+  const agentes = [...new Set(data.map(d => d.agente_nome).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="todos">Todos os agentes</option>' +
+    agentes.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('');
+  if (agentes.includes(current)) sel.value = current;
+}
+
+function filterDashData() {
+  const agente  = document.getElementById('dashFilterAgent').value;
+  const periodo = document.getElementById('dashFilterPeriodo').value;
+  const search  = (document.getElementById('dashSearch')?.value || '').toLowerCase().trim();
+  const now = new Date();
+
+  return dashData.filter(d => {
+    if (agente !== 'todos' && d.agente_nome !== agente) return false;
+    const dt = new Date(d.encaminhado_em);
+    if (periodo === 'hoje') {
+      if (dt.toDateString() !== now.toDateString()) return false;
+    } else if (periodo === '7d') {
+      if (now - dt > 7 * 86400000) return false;
+    } else if (periodo === '30d') {
+      if (now - dt > 30 * 86400000) return false;
+    }
+    if (search) {
+      const haystack = `${d.agente_nome} ${d.email_assunto} ${d.email_remetente} ${d.classificacao}`.toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+}
+
+function renderDashboard() {
+  const filtered = filterDashData();
+
+  // KPIs
+  document.getElementById('kpiTotal').textContent = filtered.length;
+  const today = new Date().toDateString();
+  document.getElementById('kpiHoje').textContent =
+    filtered.filter(d => new Date(d.encaminhado_em).toDateString() === today).length;
+
+  const porAgente = {};
+  filtered.forEach(d => { const a = d.agente_nome || 'Desconhecido'; porAgente[a] = (porAgente[a]||0) + 1; });
+  const topAgente = Object.entries(porAgente).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('kpiTopAgente').textContent = topAgente ? topAgente[0] : '—';
+
+  const porCategoria = {};
+  filtered.forEach(d => { const c = d.classificacao || 'Não definida'; porCategoria[c] = (porCategoria[c]||0) + 1; });
+  const topCategoria = Object.entries(porCategoria).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('kpiTopCategoria').textContent = topCategoria ? topCategoria[0] : '—';
+
+  renderBarChart('dashChartCategoria', porCategoria);
+  renderBarChart('dashChartAgente', porAgente);
+
+  // Tabela
+  const tbody = document.getElementById('dashTableBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">Nenhum encaminhamento encontrado para esse filtro.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(d => `
+    <tr>
+      <td>${esc(d.agente_nome || '—')}</td>
+      <td>${esc(d.email_assunto || '—')}</td>
+      <td>${esc(d.email_remetente || '—')}</td>
+      <td><span class="dash-cat-pill">${esc(d.classificacao || '—')}</span></td>
+      <td>${esc(capitalize(d.prioridade || '—'))}</td>
+      <td>${formatDateTime(d.encaminhado_em)}</td>
+    </tr>`).join('');
+}
+
+function renderBarChart(containerId, dataObj) {
+  const el = document.getElementById(containerId);
+  const entries = Object.entries(dataObj).sort((a,b)=>b[1]-a[1]);
+  if (entries.length === 0) {
+    el.innerHTML = `<p style="color:var(--text-muted);font-size:12px;">Sem dados para o filtro selecionado.</p>`;
+    return;
+  }
+  const max = Math.max(...entries.map(e => e[1]));
+  el.innerHTML = entries.map(([label, count]) => `
+    <div class="bar-row">
+      <div class="bar-label" title="${esc(label)}">${esc(label)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round((count/max)*100)}%"></div></div>
+      <div class="bar-count">${count}</div>
+    </div>`).join('');
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+document.getElementById('btnDashRefresh').addEventListener('click', loadDashboardData);
+document.getElementById('dashFilterAgent').addEventListener('change', renderDashboard);
+document.getElementById('dashFilterPeriodo').addEventListener('change', renderDashboard);
+document.getElementById('dashSearch').addEventListener('input', renderDashboard);
 
 // Checa se voltou do redirect OAuth
 (function checkRedirectToken() {
