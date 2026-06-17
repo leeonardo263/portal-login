@@ -1724,7 +1724,6 @@ async function registrarEncaminhamento(email) {
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Prefer': 'return=minimal'
       },
       body: JSON.stringify({
@@ -1764,7 +1763,7 @@ async function loadDashboardData() {
   try {
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/email_encaminhamentos?select=*&order=encaminhado_em.desc&limit=1000`,
-      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      { headers: { apikey: SUPABASE_KEY } }
     );
     if (!res.ok) throw new Error('Não foi possível carregar a tabela. Verifique se o script SQL foi executado no Supabase.');
     dashData = await res.json();
