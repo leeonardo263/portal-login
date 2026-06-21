@@ -447,6 +447,88 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
 .brand-select option { background:#1C2138; color:#F0EEE8; }
 
 /* ══════════════════════════════════════
+   TREINAMENTOS — TRILHAS GUIADAS
+══════════════════════════════════════ */
+.system-card.treino::before{background:linear-gradient(90deg,#14C8B8,#5EEAD4);}
+.system-card:hover.treino{box-shadow:0 20px 60px rgba(20,200,184,.15);}
+.treino .system-logo-wrap{background:rgba(20,200,184,.15);color:#14C8B8;font-size:28px;}
+.treino .system-modules-count{color:#14C8B8;}
+.treino .system-arrow{background:rgba(20,200,184,.15);}
+.treino-view .hero-eyebrow{color:#14C8B8;}
+.treino-view .hero-eyebrow::before{background:#14C8B8;}
+.treino-view .hero h1 em{font-style:normal;color:#14C8B8;}
+.treino-view .module-count-num{-webkit-text-stroke:2px rgba(20,200,184,.4);}
+
+.track-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;max-width:1280px;margin:0 auto;padding:0 2rem 4rem;}
+.track-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .25s cubic-bezier(.2,.8,.2,1);position:relative;overflow:hidden;}
+.track-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#14C8B8,#5EEAD4);opacity:0;transition:opacity .25s;}
+.track-card:hover::before{opacity:1;}
+.track-card:hover{transform:translateY(-4px);border-color:rgba(20,200,184,.35);box-shadow:0 16px 48px rgba(20,200,184,.12);}
+.track-card.disabled{cursor:default;opacity:.42;}
+.track-card.disabled:hover{transform:none;box-shadow:none;border-color:var(--border);}
+.track-card.disabled:hover::before{opacity:0;}
+.track-card-sys{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#14C8B8;margin-bottom:10px;}
+.track-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;letter-spacing:-.2px;margin-bottom:8px;}
+.track-card-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px;}
+.track-card-meta{font-size:11px;color:var(--muted);display:flex;gap:14px;}
+
+.trainer-stage{max-width:740px;margin:0 auto;padding:0 2rem 4rem;}
+.trainer-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
+.trainer-back{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;}
+.trainer-back:hover{color:var(--text);border-color:rgba(255,255,255,.15);}
+.trainer-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--muted);text-align:right;}
+.trainer-progress{display:flex;gap:6px;margin-bottom:28px;}
+.trainer-progress-dot{flex:1;height:4px;border-radius:2px;background:var(--surface2);transition:background .3s;}
+.trainer-progress-dot.done{background:#14C8B8;}
+.trainer-progress-dot.current{background:#5EEAD4;}
+.trainer-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px;position:relative;overflow:hidden;}
+.trainer-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#14C8B8,#5EEAD4);}
+.trainer-step-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#14C8B8;margin-bottom:10px;}
+.trainer-step-title{font-family:'Syne',sans-serif;font-weight:700;font-size:21px;letter-spacing:-.3px;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.trainer-cmd-box{background:#0A0A0A;border:1px solid rgba(20,200,184,.25);border-radius:12px;padding:18px 20px;margin-bottom:4px;}
+.trainer-cmd{font-family:'Courier New',monospace;font-size:17px;font-weight:700;color:#5EEAD4;word-break:break-all;}
+.trainer-cmd-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;margin-top:6px;}
+.trainer-section-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:18px;}
+.trainer-section-text{font-size:14px;color:var(--text);line-height:1.65;opacity:.88;}
+.trainer-error-box{background:rgba(232,197,71,.08);border:1px solid rgba(232,197,71,.22);border-radius:10px;padding:14px 16px;margin-top:22px;}
+.trainer-error-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.trainer-error-code{font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:var(--gold);}
+.trainer-error-text{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:4px;}
+.trainer-nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;}
+.trainer-nav-btn{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 22px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all .2s;}
+.trainer-nav-btn:hover{border-color:rgba(20,200,184,.35);}
+.trainer-nav-btn.primary{background:linear-gradient(90deg,#14C8B8,#0EA89A);border:none;color:#04201C;font-weight:700;}
+.trainer-nav-btn.primary:hover{opacity:.9;}
+.trainer-nav-btn:disabled{opacity:.3;cursor:default;}
+.trainer-terminal-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.trainer-terminal{background:#0A0A0A;border:1px solid rgba(20,200,184,.25);border-radius:12px;padding:14px 16px;margin-bottom:4px;}
+.trainer-terminal-row{display:flex;align-items:center;gap:10px;}
+.trainer-terminal-prompt{font-family:'Courier New',monospace;color:#5EEAD4;font-weight:700;font-size:16px;flex-shrink:0;}
+.trainer-terminal-input{flex:1;background:none;border:none;outline:none;font-family:'Courier New',monospace;font-size:15px;color:#F0EEE8;min-width:0;}
+.trainer-terminal-input::placeholder{color:var(--muted);opacity:.55;}
+.trainer-verify-btn{background:linear-gradient(90deg,#14C8B8,#0EA89A);border:none;border-radius:8px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#04201C;cursor:pointer;transition:opacity .2s;flex-shrink:0;}
+.trainer-verify-btn:hover{opacity:.88;}
+.trainer-feedback{border-radius:10px;padding:12px 16px;margin-top:14px;font-size:13px;line-height:1.55;display:flex;gap:10px;align-items:flex-start;}
+.trainer-feedback.correct{background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);color:var(--green);}
+.trainer-feedback.wrong{background:rgba(255,107,157,.08);border:1px solid rgba(255,107,157,.25);color:#FF8FAE;}
+.trainer-feedback strong{color:inherit;}
+.trainer-attempts{font-size:11px;color:var(--muted);margin-top:8px;}
+.trainer-hint-link{color:#5EEAD4;cursor:pointer;text-decoration:underline;}
+.trainer-solved-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--green);background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);border-radius:8px;padding:8px 14px;margin-bottom:4px;}
+.trainer-scenario{background:rgba(20,200,184,.07);border:1px solid rgba(20,200,184,.22);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13.5px;color:var(--text);line-height:1.6;display:flex;gap:10px;align-items:flex-start;}
+.trainer-scenario-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.trainer-complete{text-align:center;padding:8px 0;}
+.trainer-complete-icon{font-size:46px;margin-bottom:14px;}
+.trainer-complete h2{font-family:'Syne',sans-serif;font-weight:700;font-size:22px;margin-bottom:10px;}
+.trainer-complete p{font-size:14px;color:var(--muted);line-height:1.6;max-width:440px;margin:0 auto;}
+.trainer-recap{text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:24px 0;}
+.trainer-recap-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);align-items:baseline;}
+.trainer-recap-row:last-child{border-bottom:none;}
+.trainer-recap-num{font-family:'Syne',sans-serif;font-weight:800;font-size:11px;color:#14C8B8;flex-shrink:0;width:22px;}
+.trainer-recap-cmd{font-family:'Courier New',monospace;font-size:12px;color:#5EEAD4;font-weight:600;}
+.trainer-complete-actions{display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap;}
+
+/* ══════════════════════════════════════
    MOBILE RESPONSIVE — PWA
 ══════════════════════════════════════ */
 @media(max-width:768px){
@@ -535,6 +617,14 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
 
   /* PWA install btn */
   #installPwaBtn { padding:5px 10px; font-size:11px; }
+
+  /* Treinamentos */
+  .track-grid { grid-template-columns:1fr; padding:0 1rem 3rem; }
+  .trainer-stage { padding:0 1rem 3rem; }
+  .trainer-card { padding:22px 18px; }
+  .trainer-cmd { font-size:14px; }
+  .trainer-step-title { font-size:18px; }
+  .trainer-title { display:none; }
 }
 
 @media(max-width:400px){
@@ -594,6 +684,13 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
   <h1 class="landing-title">Selecione o <em>Sistema</em><br>de Treinamento</h1>
   <p class="landing-sub">Guia de referência rápida para emissão, reemissão, EMD e operações de bilheteria nos principais GDS.</p>
   <div class="system-cards">
+    <div class="system-card treino" onclick="showSystem('treino')">
+      <div class="system-logo-wrap">🎓</div>
+      <div class="system-name">Treinamentos</div>
+      <div class="system-desc">Trilhas guiadas passo a passo para quem está aprendendo um sistema do zero — comando por comando, explicando o porquê de cada etapa.</div>
+      <div class="system-modules-count">1 Trilha</div>
+      <div class="system-arrow">→</div>
+    </div>
     <div class="system-card amadeus" onclick="showSystem('amadeus')">
       <div class="system-logo-wrap">AM</div>
       <div class="system-name">Amadeus</div>
@@ -651,6 +748,44 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:28px
       <div class="system-arrow">→</div>
     </div>
   </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TREINAMENTOS VIEW
+══════════════════════════════════════ -->
+<div id="treino-view" class="system-view treino-view">
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">BeFly Travel · Treinamentos</div>
+      <h1>Aprenda <em>Passo a Passo</em><br>com Trilhas Guiadas</h1>
+      <p class="hero-sub">Trilhas práticas para quem está aprendendo um sistema do zero. Cada etapa mostra o comando, explica o porquê da ordem e aponta o erro mais comum daquele passo.</p>
+    </div>
+    <div class="module-count">
+      <div class="module-count-num">01</div>
+      <div class="module-count-label">Trilha Disponível</div>
+    </div>
+  </div>
+
+  <div id="treinoTracksGrid" class="track-grid">
+    <div class="track-card" onclick="openTrack('amadeus_criacao_reserva')">
+      <div class="track-card-sys">🔵 Amadeus</div>
+      <div class="track-card-title">Criação de Reserva (PNR)</div>
+      <div class="track-card-desc">Monte um PNR do zero: nome do passageiro, disponibilidade, venda do voo, contato, prazo e finalização — na ordem certa.</div>
+      <div class="track-card-meta"><span>🪜 7 passos</span><span>⏱️ ~10 min</span></div>
+    </div>
+    <div class="track-card disabled">
+      <div class="track-card-sys">🟢 Galileo</div>
+      <div class="track-card-title">Em breve</div>
+      <div class="track-card-desc">Novas trilhas guiadas para Galileo serão adicionadas aqui.</div>
+    </div>
+    <div class="track-card disabled">
+      <div class="track-card-sys">🟠 Sabre</div>
+      <div class="track-card-title">Em breve</div>
+      <div class="track-card-desc">Novas trilhas guiadas para Sabre serão adicionadas aqui.</div>
+    </div>
+  </div>
+
+  <div id="treinoTrainerStage" class="trainer-stage" style="display:none"></div>
 </div>
 
 <!-- ══════════════════════════════════════
@@ -3073,6 +3208,389 @@ function goHome(){
   document.getElementById('backBtn').classList.remove('visible');
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+// ══════════════════════════════════════
+// TREINAMENTOS — TRILHAS GUIADAS (PASSO A PASSO)
+// ══════════════════════════════════════
+var TRAINING_TRACKS = {
+  amadeus_criacao_reserva: {
+    title: 'Amadeus · Criação de Reserva (PNR)',
+    steps: [
+      {
+        icon:'👤', title:'Nome do Passageiro (NM)', cmd:'NM1SILVA/JOAOMR',
+        what:'NM1 indica 1 passageiro neste grupo de nome. Em seguida vem SOBRENOME/NOME, com o título (MR, MRS, MISS) colado ao final do nome — sem espaço.',
+        why:'É sempre o primeiro elemento do PNR. Nenhum outro elemento (voo, contato, etc.) pode ser inserido antes do nome.',
+        error:{codigo:'NAME MISMATCH', desc:'Nome não confere', solucao:'O nome do passageiro não confere com o documento. Corrija antes de emitir — o nome no PNR precisa ser idêntico ao do documento de viagem.'},
+        test:{
+          scenario:'Crie o elemento de nome para o passageiro adulto CERQUEIRA / LEONARDO.',
+          example:'NM1CERQUEIRA/LEONARDOMR',
+          validate:function(v){
+            var n = v.toUpperCase().replace(/\s+/g,'');
+            return /^NM1CERQUEIRA\/LEONARDO(MR|MRS|MISS|MSTR)$/.test(n);
+          }
+        }
+      },
+      {
+        icon:'🔎', title:'Disponibilidade de Voo (AN)', cmd:'AN15JUNGRUMIA',
+        what:'AN + data no formato DDMMM + origem + destino, sem espaços e sem barra. Mostra a tela de disponibilidade com os voos do dia para a rota.',
+        why:'Antes de vender um segmento (SS), você precisa ver as opções de voo, horário e classe disponíveis nessa tela.',
+        error:{codigo:'NO AVAILABILITY', desc:'Sem disponibilidade', solucao:'Não há assentos disponíveis nesta classe. Tente outra classe ou voo.'},
+        test:{
+          scenario:'Busque disponibilidade de voo no dia 12 de julho, saindo do aeroporto de GRU com destino ao aeroporto de GIG.',
+          example:'AN12JULGRUGIG',
+          validate:function(v){
+            var n = v.toUpperCase().replace(/\s+/g,'');
+            return /^AN12JULGRUGIG(\/[A-Z0-9]+)?$/.test(n);
+          }
+        }
+      },
+      {
+        icon:'✈️', title:'Venda do Segmento (SS)', cmd:'SS1Y2',
+        what:'SS + quantidade de passageiros + classe + número da linha na tela de disponibilidade. Aqui: 1 passageiro, classe Y, linha 2 do AN anterior.',
+        why:'É o comando que efetivamente reserva o voo escolhido na tela de disponibilidade — sem ele, o voo visto no AN não entra no PNR.',
+        error:{codigo:'SEGMENT SELL', desc:'Erro ao vender segmento', solucao:'Verifique disponibilidade do voo. Tente novamente ou escolha outro voo.'},
+        test:{
+          scenario:'Com base na tela de disponibilidade abaixo, confirme a reserva para 1 passageiro na classe Y no voo LA3698.',
+          screen:'> AN12JULGRUGIG/ALA\nAN12JULGRUGIG/ALA\n** FLYTOUR AVAILABILITY - AN ** GIG GALEAO A..BRRJ                 24 SU 12JUL 0000\n 1 *LA3342  W7 P5 Y7 B7 H7 K7 M7 /GRU 2 GIG 2   0700  0800  E0/320      1:00\n            L7 V7 X7 S7 N7 Q7 O7 G7 A7\n 2 *LA3340  W5 P0 Y7 B7 H7 K7 M7 /GRU 2 GIG 2   0800  0900  E0/320      1:00\n            L7 V7 X7 S7 N0 Q0 O0 G0 A0\n 3 *LA3698  W7 P4 Y7 B7 H7 K7 M7 /GRU 2 GIG 2   1200  1300  E0/320      1:00\n            L7 V7 X7 S7 N7 Q7 O7 G7 A7\n 4 *LA3366  W7 P5 Y7 B7 H7 K7 M7 /GRU 2 GIG 2   1345  1445  E0/320      1:00\n            L7 V7 X7 S7 N7 Q7 O5 G2 A0\n 5 *LA3874  W6 P2 Y7 B7 H7 K7 M7 /GRU 2 GIG 2   1745  1845  E0/321      1:00\n            L7 V7 X7 S1 N0 Q0 O0 G0 A0\n 6 *LA4672  W7 P5 Y7 B7 H7 K7 M7 /GRU 2 GIG 2   2000  2100  E0/320      1:00\n            L7 V7 X7 S7 N7 Q7 O7 G7 A7\n 7 *LA3368  W7 P5 Y7 B7 H7 K7 M7 /GRU 2 GIG 2   2045  2145  E0/321      1:00\n            L7 V7 X7 S7 N7 Q7 O7 G7 A7\n 8 *LA3352  W7 P6 Y7 B7 H7 K7 M7 /GRU 2 GIG 2   2305  0005+1E0/320      1:00\n            L7 V5 X0 S0 N0 Q0 O0 G0 A0\n 9 *LA3284  W4 P0 Y7 B7 H7 K7 M7 /GRU 2 CWB     0755  0855  E0/321\n            L7 V7 X7 S7 N0 Q0 O0 G0 A0\n   *LA3541  W4 P0 Y7 B7 H7 K7 M7 /CWB    GIG 2  0945  1110  E0/320      3:15\n            L7 V7 X7 S7 N0 Q0 O0 G0 A0',
+          example:'SS1Y3',
+          validate:function(v){
+            var n = v.toUpperCase().replace(/\s+/g,'');
+            return n === 'SS1Y3';
+          }
+        }
+      },
+      {
+        icon:'📞', title:'Elemento de Contato (AP)', cmd:'AP 11 999999999',
+        what:'AP + telefone de contato do passageiro ou da agência. Pode incluir DDD e, se necessário, um sufixo identificando o tipo (H para residencial, por exemplo).',
+        why:'É um elemento obrigatório — o sistema recusa a finalização do PNR (ER) se não houver pelo menos um contato.',
+        error:{codigo:'NEED PHONE', desc:'Telefone obrigatório', solucao:'Adicione o elemento de telefone ao PNR antes de finalizar. Use o comando AP.'},
+        test:{
+          scenario:'Inclua o telefone 11 98902-2179 como contato nesta reserva.',
+          example:'AP 11 989022179',
+          validate:function(v){
+            var n = v.toUpperCase().trim();
+            if(n.indexOf('AP') !== 0) return false;
+            var digits = n.replace(/[^0-9]/g,'');
+            return digits === '11989022179';
+          }
+        }
+      },
+      {
+        icon:'⏰', title:'Prazo para Emissão (TK)', cmd:'TKTL19SEP/1600',
+        what:'TKTL + data + hora define até quando o bilhete precisa ser emitido para garantir a tarifa e a reserva.',
+        why:'Sem um prazo definido (TKTL) ou a confirmação de bilhete já emitido (TKOK), a reserva fica vulnerável a cancelamento automático pela cia aérea.',
+        error:{codigo:'NEED TL', desc:'Time limit necessário', solucao:'Insira o time limit de emissão no PNR antes de finalizar. Ex: TKTL15JAN/2359.'},
+        test:{
+          scenario:'Informe um prazo para emissão deste bilhete — pode usar qualquer data e hora válidas.',
+          example:'TKTL18JUN/2359',
+          validate:function(v){
+            var n = v.toUpperCase().replace(/\s+/g,'');
+            return n.indexOf('TK') === 0 && n.length > 2;
+          }
+        }
+      },
+      {
+        icon:'🪪', title:'Origem da Reserva (RF)', cmd:'RF LUCIO.AGT',
+        what:'RF + identificação de quem está fazendo a reserva — geralmente o login do agente ou o nome de quem solicitou.',
+        why:'É o último elemento de identificação exigido antes de finalizar. Sem ele, a tentativa de finalizar (ER) é recusada.',
+        tip:'Diferente dos outros passos, esse elemento não tem um código de erro padronizado no banco — o sistema simplesmente impede o ER até que o RF seja inserido.',
+        test:{
+          scenario:'Registre a origem desta reserva — informe quem está fazendo a solicitação (qualquer identificação ou assinatura).',
+          example:'RFLEOC7',
+          validate:function(v){
+            var n = v.toUpperCase().replace(/\s+/g,'');
+            return n.indexOf('RF') === 0 && n.length > 2;
+          }
+        }
+      },
+      {
+        icon:'💾', title:'Finalizar o PNR (ER)', cmd:'ER',
+        what:'Encerra a transação e reexibe o PNR já salvo, com todos os elementos inseridos nos passos anteriores.',
+        why:'É o "salvar" do Amadeus. Até esse comando, nada do que foi digitado está realmente gravado no sistema.',
+        error:{codigo:'MANDATORY ELEMENT', desc:'Elemento obrigatório ausente', solucao:'Falta um elemento obrigatório no PNR. Verifique nome, telefone e TL antes de tentar novamente.'},
+        test:{
+          scenario:'Finalize a reserva, salvando todos os elementos inseridos e mantendo o PNR aberto para visualização.',
+          example:'ER',
+          validate:function(v){
+            var n = v.toUpperCase().replace(/\s+/g,'');
+            return n === 'ER';
+          }
+        }
+      }
+    ]
+  }
+};
+var trainerState = { trackId:null, phase:'study', stepIdx:0, attempts:{}, revealed:{}, lastInput:{} };
+
+function trainerNormalize(s){
+  return (s||'').trim().toUpperCase().replace(/\s+/g,' ');
+}
+
+function trainerCheck(){
+  var track = TRAINING_TRACKS[trainerState.trackId];
+  var idx = trainerState.stepIdx;
+  var step = track.steps[idx];
+  var input = document.getElementById('trainerInput');
+  var val = input ? input.value : '';
+  if(!val.trim()) return;
+  trainerState.lastInput[idx] = val;
+  var ok = (step.test && typeof step.test.validate === 'function') ? step.test.validate(val) : false;
+  trainerState.attempts[idx] = (trainerState.attempts[idx]||0) + 1;
+  if(ok) trainerState.revealed[idx] = true;
+  renderTrainer();
+}
+
+function trainerReveal(){
+  trainerState.revealed[trainerState.stepIdx] = true;
+  renderTrainer();
+}
+
+function openTrack(id){
+  var track = TRAINING_TRACKS[id];
+  if(!track) return;
+  trainerState.trackId = id;
+  trainerState.phase = 'study';
+  trainerState.stepIdx = 0;
+  trainerState.attempts = {};
+  trainerState.revealed = {};
+  trainerState.lastInput = {};
+  document.getElementById('treinoTracksGrid').style.display = 'none';
+  document.getElementById('treinoTrainerStage').style.display = 'block';
+  renderTrainer();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function trainerBackToTracks(){
+  document.getElementById('treinoTracksGrid').style.display = 'grid';
+  document.getElementById('treinoTrainerStage').style.display = 'none';
+  document.getElementById('treinoTrainerStage').innerHTML = '';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function trainerNext(){
+  var track = TRAINING_TRACKS[trainerState.trackId];
+  if(trainerState.phase === 'study'){
+    if(trainerState.stepIdx < track.steps.length - 1){
+      trainerState.stepIdx++;
+    } else {
+      trainerState.phase = 'testIntro';
+    }
+  } else if(trainerState.phase === 'test'){
+    if(trainerState.stepIdx < track.steps.length - 1){
+      trainerState.stepIdx++;
+    } else {
+      trainerState.phase = 'complete';
+    }
+  }
+  renderTrainer();
+  document.getElementById('treinoTrainerStage').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function trainerPrev(){
+  if(trainerState.stepIdx > 0){
+    trainerState.stepIdx--;
+    renderTrainer();
+    document.getElementById('treinoTrainerStage').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+function trainerStartTest(){
+  trainerState.phase = 'test';
+  trainerState.stepIdx = 0;
+  trainerState.attempts = {};
+  trainerState.revealed = {};
+  trainerState.lastInput = {};
+  renderTrainer();
+  document.getElementById('treinoTrainerStage').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function trainerBackToStudy(){
+  var track = TRAINING_TRACKS[trainerState.trackId];
+  trainerState.phase = 'study';
+  trainerState.stepIdx = track.steps.length - 1;
+  renderTrainer();
+  document.getElementById('treinoTrainerStage').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function trainerRestart(){
+  trainerState.phase = 'study';
+  trainerState.stepIdx = 0;
+  trainerState.attempts = {};
+  trainerState.revealed = {};
+  trainerState.lastInput = {};
+  renderTrainer();
+  document.getElementById('treinoTrainerStage').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderTrainer(){
+  if(trainerState.phase === 'testIntro') renderTrainerTestIntro();
+  else if(trainerState.phase === 'test') renderTrainerTestStep();
+  else if(trainerState.phase === 'complete') renderTrainerComplete();
+  else renderTrainerStudyStep();
+}
+
+// FASE 1 — ESTUDO: mostra o comando, explicação e erro comum de cada passo
+function renderTrainerStudyStep(){
+  var track = TRAINING_TRACKS[trainerState.trackId];
+  var idx = trainerState.stepIdx;
+  var step = track.steps[idx];
+  var total = track.steps.length;
+  var dots = '';
+  for(var i=0;i<total;i++){
+    var cls = i<idx ? 'done' : (i===idx ? 'current' : '');
+    dots += '<div class="trainer-progress-dot '+cls+'"></div>';
+  }
+  var errorHtml = '';
+  if(step.error){
+    errorHtml = '<div class="trainer-error-box"><div class="trainer-error-label">⚠️ Erro comum nesta etapa</div><div class="trainer-error-code">'+step.error.codigo+' — '+step.error.desc+'</div><div class="trainer-error-text">'+step.error.solucao+'</div></div>';
+  } else if(step.tip){
+    errorHtml = '<div class="trainer-error-box"><div class="trainer-error-label">💡 Atenção</div><div class="trainer-error-text">'+step.tip+'</div></div>';
+  }
+  var html =
+      '<div class="trainer-top"><button class="trainer-back" onclick="trainerBackToTracks()">← Trilhas</button><div class="trainer-title">'+track.title+' · Estudo</div></div>'
+    + '<div class="trainer-progress">'+dots+'</div>'
+    + '<div class="trainer-card">'
+      + '<div class="trainer-step-label">Passo '+(idx+1)+' de '+total+'</div>'
+      + '<div class="trainer-step-title">'+step.icon+' '+step.title+'</div>'
+      + '<div class="trainer-cmd-box"><div class="trainer-cmd">'+step.cmd+'</div></div>'
+      + '<div class="trainer-cmd-label">comando deste passo</div>'
+      + '<div class="trainer-section-label">O que esse comando faz</div>'
+      + '<div class="trainer-section-text">'+step.what+'</div>'
+      + '<div class="trainer-section-label">Por que vem nessa ordem</div>'
+      + '<div class="trainer-section-text">'+step.why+'</div>'
+      + errorHtml
+    + '</div>'
+    + '<div class="trainer-nav">'
+      + '<button class="trainer-nav-btn" onclick="trainerPrev()" '+(idx===0?'disabled':'')+'>← Anterior</button>'
+      + '<button class="trainer-nav-btn primary" onclick="trainerNext()">'+(idx===total-1?'Ir para o teste →':'Próximo →')+'</button>'
+    + '</div>';
+  document.getElementById('treinoTrainerStage').innerHTML = html;
+}
+
+// TRANSIÇÃO — tela de aviso antes do teste
+function renderTrainerTestIntro(){
+  var track = TRAINING_TRACKS[trainerState.trackId];
+  var html =
+      '<div class="trainer-top"><button class="trainer-back" onclick="trainerBackToTracks()">← Trilhas</button><div class="trainer-title">'+track.title+'</div></div>'
+    + '<div class="trainer-card"><div class="trainer-complete">'
+      + '<div class="trainer-complete-icon">🧪</div>'
+      + '<h2>Hora de testar!</h2>'
+      + '<p>Você já estudou os '+track.steps.length+' passos. Agora é a sua vez: para cada passo, digite o comando de memória (use os mesmos dados do exemplo que você acabou de ver) — sem olhar a resposta. No final, você revê a sequência completa.</p>'
+      + '<div class="trainer-complete-actions"><button class="trainer-nav-btn" onclick="trainerBackToStudy()">← Revisar passos</button><button class="trainer-nav-btn primary" onclick="trainerStartTest()">Começar teste →</button></div>'
+    + '</div></div>';
+  document.getElementById('treinoTrainerStage').innerHTML = html;
+}
+
+// FASE 2 — TESTE: terminal simulado, comando escondido até a resposta correta
+function renderTrainerTestStep(){
+  var track = TRAINING_TRACKS[trainerState.trackId];
+  var idx = trainerState.stepIdx;
+  var step = track.steps[idx];
+  var test = step.test || {};
+  var total = track.steps.length;
+  var dots = '';
+  for(var i=0;i<total;i++){
+    var cls = i<idx ? 'done' : (i===idx ? 'current' : '');
+    dots += '<div class="trainer-progress-dot '+cls+'"></div>';
+  }
+
+  var revealed = !!trainerState.revealed[idx];
+  var attempts = trainerState.attempts[idx] || 0;
+
+  var contextHtml = '<div class="trainer-scenario"><span class="trainer-scenario-icon">🎯</span><div>'+test.scenario+'</div></div>';
+  if(test.screen){
+    contextHtml += '<div class="screen-preview"><pre style="margin:0;font-family:inherit;color:inherit;white-space:pre;">'+test.screen+'</pre></div>';
+  }
+
+  var practiceHtml = '';
+  if(!revealed){
+    practiceHtml =
+        '<div class="trainer-terminal-label">💻 Terminal simulado — digite o comando</div>'
+      + '<div class="trainer-terminal">'
+        + '<div class="trainer-terminal-row">'
+          + '<span class="trainer-terminal-prompt">›</span>'
+          + '<input id="trainerInput" class="trainer-terminal-input" type="text" placeholder="Digite o comando e aperte Enter..." autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key===\'Enter\'){event.preventDefault();trainerCheck();}">'
+          + '<button class="trainer-verify-btn" onclick="trainerCheck()">Verificar</button>'
+        + '</div>'
+      + '</div>';
+  } else {
+    practiceHtml = '<div class="trainer-solved-badge">✅ Resolvido — comando aceito</div>';
+  }
+
+  var feedbackHtml = '';
+  if(attempts > 0){
+    if(revealed){
+      feedbackHtml = '<div class="trainer-feedback correct">✅ <div><strong>Correto!</strong> Esse comando atende ao que foi pedido. Veja o detalhamento abaixo.</div></div>';
+    } else {
+      var hint = attempts >= 2
+        ? step.what
+        : 'Releia o que foi pedido acima e confira espaços, barras (/) e a ordem dos elementos.';
+      feedbackHtml = '<div class="trainer-feedback wrong">❌ <div><strong>Ainda não.</strong> '+hint+'</div></div>'
+        + '<div class="trainer-attempts">Tentativa '+attempts+(attempts>=3?' · <span class="trainer-hint-link" onclick="trainerReveal()">ver um exemplo de comando aceito</span>':'')+'</div>';
+    }
+  }
+
+  var explainHtml = '';
+  if(revealed){
+    var errorHtml = '';
+    if(step.error){
+      errorHtml = '<div class="trainer-error-box"><div class="trainer-error-label">⚠️ Erro comum nesta etapa</div><div class="trainer-error-code">'+step.error.codigo+' — '+step.error.desc+'</div><div class="trainer-error-text">'+step.error.solucao+'</div></div>';
+    } else if(step.tip){
+      errorHtml = '<div class="trainer-error-box"><div class="trainer-error-label">💡 Atenção</div><div class="trainer-error-text">'+step.tip+'</div></div>';
+    }
+    explainHtml =
+        '<div class="trainer-cmd-box"><div class="trainer-cmd">'+test.example+'</div></div>'
+      + '<div class="trainer-cmd-label">exemplo de comando aceito</div>'
+      + '<div class="trainer-section-label">O que esse comando faz</div>'
+      + '<div class="trainer-section-text">'+step.what+'</div>'
+      + '<div class="trainer-section-label">Por que vem nessa ordem</div>'
+      + '<div class="trainer-section-text">'+step.why+'</div>'
+      + errorHtml;
+  }
+
+  var html =
+      '<div class="trainer-top"><button class="trainer-back" onclick="trainerBackToTracks()">← Trilhas</button><div class="trainer-title">'+track.title+' · Teste</div></div>'
+    + '<div class="trainer-progress">'+dots+'</div>'
+    + '<div class="trainer-card">'
+      + '<div class="trainer-step-label">Teste '+(idx+1)+' de '+total+'</div>'
+      + '<div class="trainer-step-title">'+step.icon+' '+step.title+'</div>'
+      + contextHtml
+      + practiceHtml
+      + feedbackHtml
+      + explainHtml
+    + '</div>'
+    + '<div class="trainer-nav">'
+      + '<button class="trainer-nav-btn" onclick="trainerPrev()" '+(idx===0?'disabled':'')+'>← Anterior</button>'
+      + '<button class="trainer-nav-btn primary" onclick="trainerNext()">'+(idx===total-1?'Concluir trilha ✓':'Próximo →')+'</button>'
+    + '</div>';
+  document.getElementById('treinoTrainerStage').innerHTML = html;
+
+  var inp = document.getElementById('trainerInput');
+  if(inp){
+    if(trainerState.lastInput[idx]) inp.value = trainerState.lastInput[idx];
+    inp.focus();
+    var v = inp.value;
+    inp.setSelectionRange(v.length, v.length);
+  }
+}
+
+function renderTrainerComplete(){
+  var track = TRAINING_TRACKS[trainerState.trackId];
+  var recap = track.steps.map(function(s,i){
+    return '<div class="trainer-recap-row"><div class="trainer-recap-num">'+(i+1)+'</div><div class="trainer-recap-cmd">'+s.cmd+'</div></div>';
+  }).join('');
+  var html =
+      '<div class="trainer-top"><button class="trainer-back" onclick="trainerBackToTracks()">← Trilhas</button><div class="trainer-title">'+track.title+'</div></div>'
+    + '<div class="trainer-card"><div class="trainer-complete">'
+      + '<div class="trainer-complete-icon">🎉</div>'
+      + '<h2>Trilha concluída!</h2>'
+      + '<p>Você estudou e testou todos os '+track.steps.length+' passos de criação de um PNR no Amadeus. Aqui está a sequência completa:</p>'
+      + '<div class="trainer-recap">'+recap+'</div>'
+      + '<div class="trainer-complete-actions"><button class="trainer-nav-btn" onclick="trainerRestart()">↺ Refazer trilha</button><button class="trainer-nav-btn primary" onclick="trainerBackToTracks()">Voltar às trilhas</button></div>'
+    + '</div></div>';
+  document.getElementById('treinoTrainerStage').innerHTML = html;
+}
+
 function switchTab(sys,idx,btn){
   var view = document.getElementById(sys+'-view');
   view.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
